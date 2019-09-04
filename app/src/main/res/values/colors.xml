@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#DDC912</color>
+    <color name="colorPrimaryDark">#9B8C03</color>
+    <color name="colorAccent">#353535</color>
+    <color name="colorBackground">#2E2E2E</color>
+    <color name="colorWhite">#fff</color>
+    <color name="colorError">#F44336</color>
+    <color name="colorButtonCamera">#2196F3</color>
+    <color name="colorButtonCameraPress">#007EDD</color>
+    <color name="colorButtonPhoto">#B652FF</color>
+    <color name="colorButtonPhotoPress">#8800EC</color>
+    <color name="colorButtonList">#F83577</color>
+    <color name="colorButtonListPress">#CE0044</color>
 </resources>
