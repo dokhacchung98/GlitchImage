@@ -17,11 +17,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.khacchung.glitchimage.customs.CallBackEffect;
 import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.R;
-import com.khacchung.glitchimage.model.MyVector;
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     private ProgressDialog dialog;
     public static final String PER_CAMERA = Manifest.permission.CAMERA;
     public static final String PER_READ = Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -46,15 +46,19 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void setFullScreen() {
+        hidenStatusBar();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+    }
+
+    protected void hidenStatusBar() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
     }
 
     protected void setTitleToolbar(String title) {
@@ -82,15 +86,6 @@ public class BaseActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-    }
-
-    protected MyVector getWidthAndHeightScreen() {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels + getNavigationBarHeight();
-        int width = displayMetrics.widthPixels;
-
-        return new MyVector(width, height);
     }
 
     private int getNavigationBarHeight() {
@@ -169,5 +164,10 @@ public class BaseActivity extends AppCompatActivity {
         TextView textView = snackBarView.findViewById(R.id.snackbar_text);
         textView.setTextColor(getResources().getColor(R.color.colorWhite));
         snackbar.show();
+    }
+
+    @Override
+    public void setEffects(int i) {
+
     }
 }
