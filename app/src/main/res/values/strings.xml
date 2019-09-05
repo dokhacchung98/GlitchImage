@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">GlitchImage</string>
+    <string name="share_app">Share App</string>
+    <string name="more">More</string>
+    <string name="rate_app">Rate App</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="error_permission">Please provide permissions to use the application..</string>
+    <string name="via_pick_image">Via</string>
+    <string name="effect_image">Effects Image</string>
+    <string name="move_fingure">Move Fingure On Image To See Effects</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="alert">Warning</string>
+    <string name="ques_save">Do you want save image before exiting the screen?</string>
+    <string name="save_success">Save image successful with path: </string>
 </resources>
