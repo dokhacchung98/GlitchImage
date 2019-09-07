@@ -1,9 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.CameraEffectActivity">
+    android:background="#646464">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <RelativeLayout
+        android:id="@+id/rl_bot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#000"
+        android:elevation="4dp"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_24sdp">
+
+        <ImageButton
+            android:id="@+id/btn_switch_mode"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_32sdp"
+            android:background="@drawable/border_button_cam"
+            android:src="@drawable/ic_video" />
+
+        <ImageButton
+            android:id="@+id/btn_take"
+            android:layout_width="@dimen/_56sdp"
+            android:layout_height="@dimen/_56sdp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/border_button_cam"
+            android:src="@drawable/background_button_take_photo" />
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/img_list"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginLeft="@dimen/_32sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:src="@drawable/ic_1"
+            app:civ_border_color="@color/colorWhite"
+            app:civ_border_width="1dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_effects"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_64sdp"
+        android:layout_above="@+id/rl_bot"
+        android:elevation="4dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_filters"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:background="#000" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#000"
+        android:padding="@dimen/_18sdp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/ic_back" />
+
+        <ImageButton
+            android:id="@+id/btn_switch_cam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@null"
+            android:src="@drawable/ic_switch" />
+
+        <ImageButton
+            android:id="@+id/btn_switch_flash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:src="@drawable/ic_flash_off" />
+
+        <ImageButton
+            android:id="@+id/btn_switch_mic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:src="@drawable/ic_voice"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <cn.ezandroid.ezfilter.core.environment.SurfaceFitView
+        android:id="@+id/render_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/rl_top" />
+
+</RelativeLayout>

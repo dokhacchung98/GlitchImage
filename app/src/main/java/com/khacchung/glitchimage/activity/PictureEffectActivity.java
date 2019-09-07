@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.util.List;
 
 import cn.ezandroid.ezfilter.EZFilter;
+import cn.ezandroid.ezfilter.core.FilterRender;
 import cn.ezandroid.ezfilter.core.RenderPipeline;
 import cn.ezandroid.ezfilter.core.environment.SurfaceFitView;
 
@@ -208,7 +209,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
             if (i == 0) {
                 imageChange = false;
                 renderPipeline = EZFilter.input(effectBmp)
-                        .addFilter(new Glitch2())
+                        .addFilter(new FilterRender())
                         .into(surfaceFitView);
                 return;
             }
@@ -294,6 +295,9 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
                     super.onBackPressed();
                 }
             });
+            Window window = dialog.getWindow();
+            window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
         } else {
             super.onBackPressed();
