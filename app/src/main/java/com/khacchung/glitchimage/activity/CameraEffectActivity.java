@@ -384,13 +384,15 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             iSupportRecord.enableRecordAudio(true);
         }
         this.pos = i;
+        renderPipeline.removeFilterRender(currentFilter);
         renderPipeline.clearEndPointRenders();
+        this.currentFilter = GalleryEffect.getEffect(this, i);
         renderPipeline = EZFilter.input(cameraDevice, previewSize)
-                .addFilter(GalleryEffect.getEffect(this, i))
+                .addFilter(currentFilter)
                 .enableRecord(pathVideo.toString() + nameFile, true, true)
                 .into(surfaceFitView);
-//        MyApplication.imgWidth = renderPipeline.getWidth();
-//        MyApplication.imgHeight = renderPipeline.getHeight();
+        MyApplication.imgWidth = renderPipeline.getWidth();
+        MyApplication.imgHeight = renderPipeline.getHeight();
         FBORender startPointRender = renderPipeline.getStartPointRender();
         if (startPointRender instanceof ISupportTakePhoto) {
             iSupportTakePhoto = (ISupportTakePhoto) startPointRender;
