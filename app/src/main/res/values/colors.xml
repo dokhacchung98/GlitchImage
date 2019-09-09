@@ -5,6 +5,7 @@
     <color name="colorAccent">#353535</color>
     <color name="colorBackground">#2E2E2E</color>
     <color name="colorWhite">#fff</color>
+    <color name="colorBlack">#000</color>
     <color name="colorError">#F44336</color>
     <color name="colorButtonCamera">#2196F3</color>
     <color name="colorButtonCameraPress">#007EDD</color>
