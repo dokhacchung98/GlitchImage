@@ -14,4 +14,5 @@
     <string name="ques_save">Do you want save image before exiting the screen?</string>
     <string name="save_success">Save image successful with path: </string>
     <string name="have_error">There was an error, please try again..</string>
+    <string name="empty_file_list">Empty file list</string>
 </resources>
