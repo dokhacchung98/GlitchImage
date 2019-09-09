@@ -33,9 +33,11 @@
                     android:src="@drawable/ic_camera" />
             </RelativeLayout>
 
-            <Button
+            <ImageButton
+                android:src="@drawable/ic_share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:layout_marginTop="@dimen/_24sdp" />
 
             <TextView
@@ -68,9 +70,11 @@
                     android:src="@drawable/ic_photos" />
             </RelativeLayout>
 
-            <Button
+            <ImageButton
+                android:src="@drawable/ic_more"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:layout_marginTop="@dimen/_24sdp" />
 
             <TextView
@@ -103,7 +107,9 @@
                     android:src="@drawable/ic_list" />
             </RelativeLayout>
 
-            <Button
+            <ImageButton
+                android:src="@drawable/ic_rate"
+                android:background="@null"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_24sdp" />
