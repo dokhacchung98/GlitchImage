@@ -1,6 +1,8 @@
 package com.khacchung.glitchimage.fragment;
 
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import com.khacchung.glitchimage.customs.CallBackClick;
 import java.util.ArrayList;
 
 public class ImageCreatedFragment extends Fragment {
+    private static final String TAG = ImageCreatedFragment.class.getSimpleName();
     private BaseActivity baseActivity;
     private ArrayList<String> listUriImages;
     private RecyclerView recyclerViewImage;
@@ -42,16 +45,26 @@ public class ImageCreatedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_image, container, false);
         recyclerViewImage = view.findViewById(R.id.rcv_image);
         txtEmpty = view.findViewById(R.id.txt_empty);
+        imageAdapter = new ImageAdapter(baseActivity, listUriImages, callBackClick);
+        recyclerViewImage.setAdapter(imageAdapter);
+        recyclerViewImage.setLayoutManager(new GridLayoutManager(baseActivity, 2));
+        txtEmpty.setVisibility(listUriImages.isEmpty() ? View.VISIBLE : View.GONE);
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        imageAdapter = new ImageAdapter(baseActivity, listUriImages, callBackClick);
-        recyclerViewImage.setAdapter(imageAdapter);
-        recyclerViewImage.setLayoutManager(new GridLayoutManager(baseActivity, 2));
-        txtEmpty.setVisibility(listUriImages.isEmpty() ? View.VISIBLE : View.GONE);
 
+
+    }
+
+    public void updateListImage(ArrayList<String> list) {
+        Log.e(TAG, "updateListImage() " + list.size());
+        this.listUriImages = list;
+        if (imageAdapter != null) {
+            imageAdapter.notifyDataSetChanged();
+            txtEmpty.setVisibility(listUriImages.isEmpty() ? View.VISIBLE : View.GONE);
+        }
     }
 }

@@ -408,11 +408,16 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             CameraCharacteristics cameraCharacteristics =
-                    manager.getCameraCharacteristics(isFontCamera ? "1" : "0");
+                    null;
+            if (manager != null) {
+                cameraCharacteristics = manager.getCameraCharacteristics(isFontCamera ? "1" : "0");
+            }
             StreamConfigurationMap map =
                     cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             if (map != null && checkPermission(BaseActivity.PER_CAMERA)) {
-                manager.openCamera(isFontCamera ? "1" : "0", stateCallback, null);
+                if (manager != null) {
+                    manager.openCamera(isFontCamera ? "1" : "0", stateCallback, null);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

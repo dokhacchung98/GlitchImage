@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">GlitchImage</string>
     <string name="share_app">Share App</string>
+    <string name="share_image">Share Image..</string>
+    <string name="share_video">Share Video..</string>
     <string name="more">More</string>
     <string name="rate_app">Rate App</string>
     <string name="please_wait">Please Wait</string>
@@ -15,4 +17,5 @@
     <string name="save_success">Save image successful with path: </string>
     <string name="have_error">There was an error, please try again..</string>
     <string name="empty_file_list">Empty file list</string>
+    <string name="preview">Photo View</string>
 </resources>

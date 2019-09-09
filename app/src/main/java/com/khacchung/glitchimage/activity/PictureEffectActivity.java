@@ -1,12 +1,10 @@
 package com.khacchung.glitchimage.activity;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +24,6 @@ import com.khacchung.glitchimage.adapter.EffectAdapter;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
-import com.khacchung.glitchimage.filter.Glitch2;
 import com.khacchung.glitchimage.util.GalleryEffect;
 import com.khacchung.glitchimage.util.PathManager;
 
@@ -50,7 +47,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
     private Bitmap effectBmp;
     private int pos = 0;
     private List<String> effectName;
-    private Handler handler = new Handler();
     private boolean imageChange = false;
     private int[] icon = {
             R.drawable.ic_0,
@@ -132,8 +128,10 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         recyclerView.setLayoutManager(
                 new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
         );
-//        showLoading();
-//        handler.post(runnable);
+
+        renderPipeline = EZFilter.input(effectBmp)
+                .addFilter(new FilterRender())
+                .into(surfaceFitView);
     }
 
     @Override
@@ -197,8 +195,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
             }
         }
     }
-
-    private Runnable runnable = this::getImageFromUri;
 
     @Override
     public void setEffects(int i) {

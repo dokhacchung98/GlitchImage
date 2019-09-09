@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
@@ -26,6 +27,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private RelativeLayout rlCamera;
     private RelativeLayout rlPhoto;
     private RelativeLayout rlList;
+    private ImageButton btnShare;
+    private ImageButton btnMore;
+    private ImageButton btnRate;
     private int screenHeight;
 
     private MyApplication myApplication;
@@ -48,10 +52,16 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         rlCamera = findViewById(R.id.rl_camera);
         rlPhoto = findViewById(R.id.rl_photo);
         rlList = findViewById(R.id.rl_list);
+        btnMore = findViewById(R.id.btn_more);
+        btnShare = findViewById(R.id.btn_share);
+        btnRate = findViewById(R.id.btn_rate);
 
         rlList.setOnClickListener(this);
         rlPhoto.setOnClickListener(this);
         rlCamera.setOnClickListener(this);
+        btnRate.setOnClickListener(this);
+        btnShare.setOnClickListener(this);
+        btnMore.setOnClickListener(this);
 
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenHeight = displayMetrics.heightPixels;
@@ -69,7 +79,24 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
             case R.id.rl_list:
                 gotoListFileCreated();
                 break;
+            case R.id.btn_share:
+                intentShareApp();
+                break;
+            case R.id.btn_more:
+                moreApp();
+                break;
+            case R.id.btn_rate:
+                rateApp();
+                break;
         }
+    }
+
+    private void rateApp() {
+        //todo: rate app
+    }
+
+    private void moreApp() {
+        //todo: view more app
     }
 
     private void gotoListFileCreated() {
