@@ -9,12 +9,16 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,7 +49,7 @@ import cn.ezandroid.ezfilter.media.record.ISupportRecord;
 import cn.ezandroid.ezfilter.media.record.RecordableRender;
 
 public class CameraEffectActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
-    private static RenderPipeline renderPipeline = new RenderPipeline();
+    private RenderPipeline renderPipeline = new RenderPipeline();
 
     private PathManager pathManager;
     private int pos = 0;
@@ -110,6 +114,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private CircularImageView imgListPhoto;
     private ImageButton btnSwitchMode;
     private ImageButton btnTake;
+    private TextView txtTime;
+    private RelativeLayout lnHint;
 
     private int screenHeight;
     private int screenWidth;
@@ -124,8 +130,17 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private ISupportRecord iSupportRecord;
     private ISupportTakePhoto iSupportTakePhoto;
 
-    private StringBuilder pathVideo;
+    private String pathVideo;
     private String nameFile;
+
+    private boolean isRecord = false;
+    private long startTime = 0;
+    private boolean take_photo = true;
+    private long timeInMilliseconds = 0;
+    private long timeSwapBuff = 0;
+    private long updatedTime = 0;
+
+    private Handler customHandler = new Handler();
 
     public static void startIntent(BaseActivity activity) {
         activity.startActivity(
@@ -141,11 +156,15 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         setContentView(R.layout.activity_camera_effect);
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int w = displayMetrics.widthPixels;
-        int h = (w * 9) / 16;
+        int h = (w * 3) / 4;
+//        int h = displayMetrics.heightPixels;
         previewSize = new Size(w, h);
         currentFilter = new FilterRender();
+        nameFile = "video" + System.currentTimeMillis() + ".mp4";
+
         MyApplication.imgHeight = h;
         MyApplication.imgWidth = w;
+        Log.e("taGa", "w" + w + ", h:" + h);
         initView();
         openCamera();
     }
@@ -156,6 +175,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         surfaceFitView = findViewById(R.id.render_view);
         surfaceFitView.setOnTouchListener(this);
         surfaceFitView.setRenderMode(1);
+        txtTime = findViewById(R.id.txt_time);
+        lnHint = findViewById(R.id.rl_function);
 
         btnBack = findViewById(R.id.btn_back);
         btnSwitchCam = findViewById(R.id.btn_switch_cam);
@@ -193,10 +214,9 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         @Override
         public void onOpened(@NonNull CameraDevice camDevice) {
             cameraDevice = camDevice;
-            nameFile = System.currentTimeMillis() + ".mp4";
             renderPipeline = EZFilter.input(cameraDevice, previewSize)
-                    .addFilter(new FilterRender())
-                    .enableRecord(pathVideo.toString() + nameFile, true, true)
+                    .addFilter(currentFilter)
+                    .enableRecord(pathVideo, true, true)
                     .into(surfaceFitView);
             FBORender startPointRender = renderPipeline.getStartPointRender();
             if (startPointRender instanceof ISupportTakePhoto) {
@@ -263,13 +283,10 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
                         if (pathManager == null) {
                             pathManager = new PathManager(CameraEffectActivity.this);
                         }
-                        pathVideo = new StringBuilder();
                         if (!pathManager.checkFolderExists(PathManager.FOLDER_VIDEO)) {
                             pathManager.createFolderVideo();
                         }
-                        pathVideo.append(PathManager.getPathFolder(CameraEffectActivity.this));
-                        pathVideo.append(PathManager.FOLDER_VIDEO);
-                        pathVideo.append("/video");
+                        getVideoFilePath();
                     }
 
                     @Override
@@ -295,7 +312,11 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         if (isTakePhoto) {
             saveImage();
         } else {
-            startRecord();
+            if (!isRecord) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
         }
     }
 
@@ -317,10 +338,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         isFontCamera = !isFontCamera;
         releaseCamera();
         openCamera();
-    }
-
-    private void startRecord() {
-
     }
 
     private void saveImage() {
@@ -379,27 +396,26 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     public void setEffects(int i) {
         releaseCamera();
         openCamera();
-        nameFile = System.currentTimeMillis() + ".mp4";
         if (iSupportRecord != null) {
             iSupportRecord.enableRecordAudio(true);
         }
         this.pos = i;
         renderPipeline.removeFilterRender(currentFilter);
         renderPipeline.clearEndPointRenders();
+
         this.currentFilter = GalleryEffect.getEffect(this, i);
+
         renderPipeline = EZFilter.input(cameraDevice, previewSize)
                 .addFilter(currentFilter)
-                .enableRecord(pathVideo.toString() + nameFile, true, true)
+                .enableRecord(pathVideo, true, true)
                 .into(surfaceFitView);
-        MyApplication.imgWidth = renderPipeline.getWidth();
-        MyApplication.imgHeight = renderPipeline.getHeight();
         FBORender startPointRender = renderPipeline.getStartPointRender();
         if (startPointRender instanceof ISupportTakePhoto) {
             iSupportTakePhoto = (ISupportTakePhoto) startPointRender;
         }
-        for (GLRender gLRender : renderPipeline.getEndPointRenders()) {
-            if (gLRender instanceof RecordableRender) {
-                iSupportRecord = (RecordableRender) gLRender;
+        for (GLRender glRender : renderPipeline.getEndPointRenders()) {
+            if (glRender instanceof RecordableRender) {
+                iSupportRecord = (ISupportRecord) glRender;
             }
         }
     }
@@ -429,5 +445,65 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             cameraDevice.close();
         }
         cameraDevice = null;
+    }
+
+    private void startRecording() {
+        this.isRecord = true;
+        if (this.iSupportRecord != null) {
+            this.startTime = SystemClock.uptimeMillis();
+            this.lnHint.setVisibility(View.GONE);
+            this.imgListPhoto.setVisibility(View.GONE);
+            this.relativeEffect.setVisibility(View.GONE);
+            this.btnSwitchMode.setVisibility(View.GONE);
+            this.txtTime.setVisibility(View.VISIBLE);
+            this.customHandler.postDelayed(this.updateTimerThread, 0);
+            this.iSupportRecord.startRecording();
+        }
+    }
+
+    public void stopRecording() {
+        this.isRecord = false;
+        this.timeSwapBuff += this.timeInMilliseconds;
+        this.customHandler.removeCallbacks(this.updateTimerThread);
+        this.txtTime.setText(getResources().getString(R.string.start_time));
+        if (this.iSupportRecord != null) {
+            this.iSupportRecord.stopRecording();
+            this.lnHint.setVisibility(View.VISIBLE);
+            this.imgListPhoto.setVisibility(View.VISIBLE);
+            this.relativeEffect.setVisibility(View.VISIBLE);
+            this.btnSwitchMode.setVisibility(View.VISIBLE);
+            this.txtTime.setVisibility(View.GONE);
+        }
+        ListFileActivity.startIntent(this, pathVideo, ListFileActivity.TYPE_VIDEO);
+        this.nameFile = System.currentTimeMillis() + ".mp4";
+        getVideoFilePath();
+    }
+
+    private Runnable updateTimerThread = new Runnable() {
+        public void run() {
+            timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
+            updatedTime = timeSwapBuff + timeInMilliseconds;
+            int i = (int) (updatedTime / 1000);
+            int i2 = i / 60;
+            int i3 = i % 60;
+            long j = updatedTime % 1000;
+            StringBuilder sb = new StringBuilder();
+            sb.append("");
+            sb.append(String.format("%02d", new Object[]{Integer.valueOf(i2)}));
+            sb.append(":");
+            sb.append(String.format("%02d", new Object[]{Integer.valueOf(i3)}));
+            txtTime.setText(sb.toString());
+            customHandler.postDelayed(this, 0);
+        }
+    };
+
+    private void getVideoFilePath() {
+        File file = new File(PathManager.getPathFolder(this)
+                + PathManager.FOLDER_VIDEO,
+                nameFile);
+        if (file.exists()) {
+            file.delete();
+        }
+        pathVideo = file.getAbsolutePath();
     }
 }

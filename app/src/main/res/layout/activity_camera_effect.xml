@@ -62,42 +62,59 @@
     <RelativeLayout
         android:id="@+id/rl_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@color/colorBlack"
-        android:padding="@dimen/_18sdp">
+        android:elevation="4dp">
 
-        <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:src="@drawable/ic_back" />
-
-        <ImageButton
-            android:id="@+id/btn_switch_cam"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/rl_function"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@null"
-            android:src="@drawable/ic_switch" />
+            android:layout_marginHorizontal="@dimen/_24sdp">
 
-        <ImageButton
-            android:id="@+id/btn_switch_flash"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@null"
-            android:src="@drawable/ic_flash_off" />
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:src="@drawable/ic_back" />
 
-        <ImageButton
-            android:id="@+id/btn_switch_mic"
-            android:layout_width="wrap_content"
+            <ImageButton
+                android:id="@+id/btn_switch_cam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:src="@drawable/ic_switch" />
+
+            <ImageButton
+                android:id="@+id/btn_switch_flash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:src="@drawable/ic_flash_off" />
+
+            <ImageButton
+                android:id="@+id/btn_switch_mic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:src="@drawable/ic_voice"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@null"
-            android:src="@drawable/ic_voice"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="@string/start_time"
+            android:textColor="@color/colorWhite"
             android:visibility="gone" />
-
     </RelativeLayout>
 
     <cn.ezandroid.ezfilter.core.environment.SurfaceFitView

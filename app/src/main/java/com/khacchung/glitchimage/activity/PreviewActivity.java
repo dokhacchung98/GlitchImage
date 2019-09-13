@@ -5,6 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 
@@ -23,6 +26,7 @@ public class PreviewActivity extends BaseActivity {
     private int myType;
     private String myPath;
     private PhotoView photoView;
+    private VideoView videoView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,8 +38,21 @@ public class PreviewActivity extends BaseActivity {
         myPath = intent.getStringExtra(ListFileActivity.PATH);
         myType = intent.getIntExtra(ListFileActivity.TYPE, ListFileActivity.TYPE_IMG);
 
+        videoView = findViewById(R.id.video_views);
         photoView = findViewById(R.id.photo_view);
-        photoView.setImageURI(Uri.parse(myPath));
+        if (myType == ListFileActivity.TYPE_IMG) {
+            videoView.setVisibility(View.GONE);
+            photoView.setImageURI(Uri.parse(myPath));
+        } else if (myType == ListFileActivity.TYPE_VIDEO) {
+            photoView.setVisibility(View.GONE);
+            MediaController mediaController = new MediaController(this);
+            mediaController.setAnchorView(videoView);
+            Uri uri = Uri.parse(myPath);
+            videoView.setMediaController(mediaController);
+            videoView.setVideoURI(uri);
+            videoView.requestFocus();
+            videoView.start();
+        }
     }
 
     @Override
