@@ -1,5 +1,6 @@
 package com.khacchung.glitchimage.adapter;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.MyViewHolder
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.imgThumbnail.setOnClickListener(view -> callBack.ClickImage(position));
+        holder.imgThumbnail.setImageURI(Uri.parse(listImages.get(position)));
     }
 
     @Override
@@ -43,10 +45,10 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.MyViewHolder
         return listImages.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView imgThumbnail;
+    class MyViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgThumbnail;
 
-        public MyViewHolder(@NonNull View itemView) {
+        MyViewHolder(@NonNull View itemView) {
             super(itemView);
             imgThumbnail = itemView.findViewById(R.id.img_thumbnail);
         }

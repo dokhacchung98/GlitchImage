@@ -1,12 +1,10 @@
 package com.khacchung.glitchimage.activity;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +24,6 @@ import com.khacchung.glitchimage.adapter.EffectAdapter;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
-import com.khacchung.glitchimage.filter.Glitch2;
 import com.khacchung.glitchimage.util.GalleryEffect;
 import com.khacchung.glitchimage.util.PathManager;
 
@@ -35,6 +32,7 @@ import java.io.FileOutputStream;
 import java.util.List;
 
 import cn.ezandroid.ezfilter.EZFilter;
+import cn.ezandroid.ezfilter.core.FilterRender;
 import cn.ezandroid.ezfilter.core.RenderPipeline;
 import cn.ezandroid.ezfilter.core.environment.SurfaceFitView;
 
@@ -49,7 +47,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
     private Bitmap effectBmp;
     private int pos = 0;
     private List<String> effectName;
-    private Handler handler = new Handler();
     private boolean imageChange = false;
     private int[] icon = {
             R.drawable.ic_0,
@@ -131,8 +128,10 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         recyclerView.setLayoutManager(
                 new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
         );
-//        showLoading();
-//        handler.post(runnable);
+
+        renderPipeline = EZFilter.input(effectBmp)
+                .addFilter(new FilterRender())
+                .into(surfaceFitView);
     }
 
     @Override
@@ -146,7 +145,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         super.onResume();
         checkPermission(new String[]{
                         BaseActivity.PER_READ,
-                        BaseActivity.PER_CAMERA
+                        BaseActivity.PER_WRITE
                 },
                 new CallBackPermission() {
                     @Override
@@ -197,8 +196,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         }
     }
 
-    private Runnable runnable = this::getImageFromUri;
-
     @Override
     public void setEffects(int i) {
         imageChange = true;
@@ -208,7 +205,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
             if (i == 0) {
                 imageChange = false;
                 renderPipeline = EZFilter.input(effectBmp)
-                        .addFilter(new Glitch2())
+                        .addFilter(new FilterRender())
                         .into(surfaceFitView);
                 return;
             }
@@ -275,7 +272,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         finish();
     }
 
-
     @Override
     public void onBackPressed() {
         if (imageChange) {
@@ -294,6 +290,9 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
                     super.onBackPressed();
                 }
             });
+            Window window = dialog.getWindow();
+            window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
         } else {
             super.onBackPressed();

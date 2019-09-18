@@ -1,14 +1,18 @@
 package com.khacchung.glitchimage.base;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -17,15 +21,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.khacchung.glitchimage.BuildConfig;
 import com.khacchung.glitchimage.customs.CallBackEffect;
 import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.R;
 
+@SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     private ProgressDialog dialog;
     public static final String PER_CAMERA = Manifest.permission.CAMERA;
     public static final String PER_READ = Manifest.permission.READ_EXTERNAL_STORAGE;
     public static final String PER_WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public static final String PER_AUDIO = Manifest.permission.RECORD_AUDIO;
     public static final int CODE_PERMISSION = 12;
 
     private CallBackPermission callBackPermission;
@@ -169,5 +176,52 @@ public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     @Override
     public void setEffects(int i) {
 
+    }
+
+    public void intentShareImage(String path) {
+        MediaScannerConnection.scanFile(this, new String[]{path},
+
+                null, (path1, uri) -> {
+                    Intent shareIntent = new Intent(
+                            Intent.ACTION_SEND);
+                    shareIntent.setType("image/*");
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    shareIntent
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    startActivity(Intent.createChooser(shareIntent,
+                            getResources().getString(R.string.share_image)));
+
+                });
+    }
+
+    public void intentShareVideo(String path) {
+        MediaScannerConnection.scanFile(this, new String[]{path},
+
+                null, (path1, uri) -> {
+                    Intent shareIntent = new Intent(
+                            Intent.ACTION_SEND);
+                    shareIntent.setType("video/*");
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    shareIntent
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    startActivity(Intent.createChooser(shareIntent,
+                            getResources().getString(R.string.share_video)));
+
+                });
+    }
+
+    protected void intentShareApp() {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+            String shareMessage = getString(R.string.app_name);
+            shareMessage = shareMessage + "https://play.google.com/store/apps/details?id="
+                    + BuildConfig.APPLICATION_ID + "\n\n";
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+            startActivity(Intent.createChooser(shareIntent, "Choose one"));
+        } catch (Exception e) {
+            Toast.makeText(this, getResources().getString(R.string.have_error), Toast.LENGTH_SHORT).show();
+        }
     }
 }

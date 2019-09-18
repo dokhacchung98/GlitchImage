@@ -5,6 +5,8 @@
     <color name="colorAccent">#353535</color>
     <color name="colorBackground">#2E2E2E</color>
     <color name="colorWhite">#fff</color>
+    <color name="colorNoneSeleted">#C9C9C9</color>
+    <color name="colorRed">#FF2B2B</color>
     <color name="colorBlack">#000</color>
     <color name="colorError">#F44336</color>
     <color name="colorButtonCamera">#2196F3</color>
@@ -13,4 +15,5 @@
     <color name="colorButtonPhotoPress">#8800EC</color>
     <color name="colorButtonList">#F83577</color>
     <color name="colorButtonListPress">#CE0044</color>
+    <color name="colorBackgroundDark">#1D1D1D</color>
 </resources>

@@ -14,6 +14,7 @@ import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
 import com.khacchung.glitchimage.customs.CallBackPermission;
+import com.khacchung.glitchimage.customs.UpdateList;
 import com.khacchung.glitchimage.fragment.ImageCreatedFragment;
 import com.khacchung.glitchimage.fragment.ListFileFragment;
 import com.khacchung.glitchimage.fragment.PreviewFragment;
@@ -23,11 +24,11 @@ import com.khacchung.glitchimage.util.PathManager;
 import java.io.File;
 import java.util.ArrayList;
 
-public class ListFileActivity extends BaseActivity implements CallBackClick {
+public class ListFileActivity extends BaseActivity implements CallBackClick, UpdateList {
     public static final String TYPE = "TYPE";
     public static final String PATH = "PATH";
-    private static final int LIST_FILE_FRAGMENT = 0;
-    private static final int PREVIEW_FRAGMENT = 1;
+    public static final int LIST_FILE_FRAGMENT = 0;
+    public static final int PREVIEW_FRAGMENT = 1;
     public static final int TYPE_IMG = 1;
     public static final int TYPE_VIDEO = 2;
     private static final String TAG = ListFileActivity.class.getSimpleName();
@@ -84,13 +85,14 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
                 finish();
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void initView() {
-        getAllImagesIsCreated();
-        getAllVideosIsCreated();
-
         listImages = new ArrayList<>();
         listVideos = new ArrayList<>();
 
@@ -98,11 +100,21 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
         videoCreatedFragment = new VideoCreatedFragment(this, listVideos, this);
 
         listFileFragment = new ListFileFragment(this, this, imageCreatedFragment, videoCreatedFragment);
-        previewFragment = new PreviewFragment();
+        previewFragment = new PreviewFragment(this, listImages, this);
 
         addFragment();
         switchFragment(LIST_FILE_FRAGMENT);
 
+        getAllImagesIsCreated();
+        getAllVideosIsCreated();
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getAllVideosIsCreated();
+        getAllImagesIsCreated();
     }
 
     private void addFragment() {
@@ -119,7 +131,7 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
         transaction.commit();
     }
 
-    private void switchFragment(int pos) {
+    public void switchFragment(int pos) {
         currentFragment = pos;
         hidenAllFramgent();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -136,13 +148,18 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
 
     @Override
     public void ClickImage(int pos) {
+        if (previewFragment != null) {
+            previewFragment.update(listImages);
+        }
         switchFragment(PREVIEW_FRAGMENT);
+        previewFragment.scrollToPos(pos);
     }
 
     @Override
     public void ClickVideo(int pos) {
-        switchFragment(PREVIEW_FRAGMENT);
-
+        if (pos >= 0 && pos < listVideos.size()) {
+            PreviewActivity.startIntent(this, listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+        }
     }
 
     @Override
@@ -177,6 +194,10 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
                     listVideos.add(f.getAbsolutePath());
                     Log.e(TAG, "getAllVideosIsCreated(): " + f.getAbsolutePath());
                 }
+
+        if (videoCreatedFragment != null) {
+            videoCreatedFragment.updateListVideo(listVideos);
+        }
     }
 
     private void getAllImagesIsCreated() {
@@ -202,5 +223,16 @@ public class ListFileActivity extends BaseActivity implements CallBackClick {
                     }
                 }
             }
+        if (imageCreatedFragment != null) {
+            imageCreatedFragment.updateListImage(listImages);
+        }
+    }
+
+    @Override
+    public void listIsChange(ArrayList<String> list) {
+        this.listImages = list;
+        if (imageCreatedFragment != null) {
+            imageCreatedFragment.updateListImage(list);
+        }
     }
 }

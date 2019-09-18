@@ -17,11 +17,11 @@ import java.util.ArrayList;
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder> {
     private BaseActivity baseActivity;
     private CallBackClick callBack;
-    private ArrayList<String> listImages;
+    private ArrayList<String> listVieos;
 
     public VideoAdapter(BaseActivity baseActivity, ArrayList<String> listImages, CallBackClick callBack) {
         this.baseActivity = baseActivity;
-        this.listImages = listImages;
+        this.listVieos = listImages;
         this.callBack = callBack;
     }
 
@@ -29,24 +29,36 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(baseActivity);
-        View view = inflater.inflate(R.layout.item_image, parent, false);
+        View view = inflater.inflate(R.layout.item_video, parent, false);
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+//        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+//        Cursor cursor = baseActivity.getContentResolver()
+//                .query(Uri.parse(listVieos.get(position)), filePathColumn, null, null, null);
+//        cursor.moveToFirst();
+//        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//        String picturePath = cursor.getString(columnIndex);
+//        cursor.close();
+//
+//        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(picturePath, MediaStore.Video.Thumbnails.MICRO_KIND);
+
         holder.imgThumbnail.setOnClickListener(view -> callBack.ClickVideo(position));
+//        holder.imgThumbnail.setImageBitmap(bitmap);
+        holder.imgThumbnail.setImageResource(R.drawable.ic_voice);
     }
 
     @Override
     public int getItemCount() {
-        return listImages.size();
+        return listVieos.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView imgThumbnail;
+    class MyViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgThumbnail;
 
-        public MyViewHolder(@NonNull View itemView) {
+        MyViewHolder(@NonNull View itemView) {
             super(itemView);
             imgThumbnail = itemView.findViewById(R.id.img_thumbnail);
         }

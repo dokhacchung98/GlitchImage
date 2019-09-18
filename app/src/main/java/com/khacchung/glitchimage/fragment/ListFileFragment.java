@@ -45,20 +45,21 @@ public class ListFileFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPagerAdapter = new ViewPagerAdapter(baseActivity, baseActivity.getSupportFragmentManager(),
                 imageCreatedFragment, videoCreatedFragment);
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         if (tabLayout.getTabCount() == 2) {
-            tabLayout.getTabAt(0).setIcon(R.drawable.ic_photos);
-            tabLayout.getTabAt(1).setIcon(R.drawable.ic_camera);
+            tabLayout.getTabAt(0).setIcon(R.drawable.ic_picture);
+            tabLayout.getTabAt(1).setIcon(R.drawable.ic_film);
         }
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
     }
 }
