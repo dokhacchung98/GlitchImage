@@ -1,6 +1,7 @@
 package com.khacchung.glitchimage.base;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,11 +26,13 @@ import com.khacchung.glitchimage.customs.CallBackEffect;
 import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.R;
 
+@SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     private ProgressDialog dialog;
     public static final String PER_CAMERA = Manifest.permission.CAMERA;
     public static final String PER_READ = Manifest.permission.READ_EXTERNAL_STORAGE;
     public static final String PER_WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public static final String PER_AUDIO = Manifest.permission.RECORD_AUDIO;
     public static final int CODE_PERMISSION = 12;
 
     private CallBackPermission callBackPermission;

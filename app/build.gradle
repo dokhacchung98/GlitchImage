@@ -42,4 +42,6 @@ dependencies {
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     implementation 'com.mikhaellopez:circularimageview:4.0.2'
+
+    implementation 'com.devbrackets.android:exomedia:4.3.0'
 }

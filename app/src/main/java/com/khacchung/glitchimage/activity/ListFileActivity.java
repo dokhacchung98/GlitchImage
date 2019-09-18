@@ -27,8 +27,8 @@ import java.util.ArrayList;
 public class ListFileActivity extends BaseActivity implements CallBackClick, UpdateList {
     public static final String TYPE = "TYPE";
     public static final String PATH = "PATH";
-    private static final int LIST_FILE_FRAGMENT = 0;
-    private static final int PREVIEW_FRAGMENT = 1;
+    public static final int LIST_FILE_FRAGMENT = 0;
+    public static final int PREVIEW_FRAGMENT = 1;
     public static final int TYPE_IMG = 1;
     public static final int TYPE_VIDEO = 2;
     private static final String TAG = ListFileActivity.class.getSimpleName();
@@ -85,7 +85,11 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
                 finish();
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void initView() {
@@ -106,6 +110,13 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
 
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getAllVideosIsCreated();
+        getAllImagesIsCreated();
+    }
+
     private void addFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_render, listFileFragment);
@@ -120,7 +131,7 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         transaction.commit();
     }
 
-    private void switchFragment(int pos) {
+    public void switchFragment(int pos) {
         currentFragment = pos;
         hidenAllFramgent();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

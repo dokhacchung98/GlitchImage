@@ -62,6 +62,7 @@
                 android:textColor="@color/colorWhite" />
 
             <TextView
+                android:id="@+id/txt_alert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/ques_save"

@@ -145,7 +145,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         super.onResume();
         checkPermission(new String[]{
                         BaseActivity.PER_READ,
-                        BaseActivity.PER_CAMERA
+                        BaseActivity.PER_WRITE
                 },
                 new CallBackPermission() {
                     @Override
@@ -271,7 +271,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         ListFileActivity.startIntent(this, str, ListFileActivity.TYPE_IMG);
         finish();
     }
-
 
     @Override
     public void onBackPressed() {

@@ -140,7 +140,8 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         checkPermission(new String[]{
                         BaseActivity.PER_READ,
                         BaseActivity.PER_WRITE,
-                        BaseActivity.PER_CAMERA
+                        BaseActivity.PER_CAMERA,
+                        BaseActivity.PER_AUDIO
                 },
                 new CallBackPermission() {
                     @Override

@@ -1,12 +1,16 @@
 package com.khacchung.glitchimage.fragment;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -120,14 +124,47 @@ public class PreviewFragment extends Fragment implements ViewPager.OnPageChangeL
     }
 
     private void removeFile(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            file.delete();
-        }
-        baseActivity.sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE"
-                , Uri.fromFile(file)));
-        listImages.remove(path);
-        updateList.listIsChange(listImages);
-        slideImageAdapter.notifyDataSetChanged();
+        final Dialog dialog = new Dialog(baseActivity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.dialog_alert_save);
+
+        TextView txtAlert = dialog.findViewById(R.id.txt_alert);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnSave.setText(baseActivity.getResources().getString(R.string.remove));
+        txtAlert.setText(baseActivity.getResources().getString(R.string.ques_remove));
+        btnSave.setOnClickListener(v -> {
+            File file = new File(path);
+            if (file.exists()) {
+                file.delete();
+            }
+            baseActivity.sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE"
+                    , Uri.fromFile(file)));
+            listImages.remove(path);
+            updateList.listIsChange(listImages);
+            slideImageAdapter.notifyDataSetChanged();
+            if (listImages.size() == 0) {
+                ((ListFileActivity) baseActivity).switchFragment(ListFileActivity.LIST_FILE_FRAGMENT);
+            } else {
+                if (currentPosition >= listImages.size()) {
+                    currentPosition = listImages.size() - 1;
+                }
+                viewPager.setCurrentItem(currentPosition);
+            }
+            dialog.cancel();
+            dialog.dismiss();
+        });
+        btnCancel.setOnClickListener(v -> {
+            if (dialog.isShowing()) {
+                dialog.cancel();
+                dialog.dismiss();
+            }
+        });
+        Window window = dialog.getWindow();
+        window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
     }
 }

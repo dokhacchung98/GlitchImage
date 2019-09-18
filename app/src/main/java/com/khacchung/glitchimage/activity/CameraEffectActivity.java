@@ -3,6 +3,8 @@ package com.khacchung.glitchimage.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
@@ -15,6 +17,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -36,6 +40,10 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import cn.ezandroid.ezfilter.EZFilter;
@@ -49,6 +57,11 @@ import cn.ezandroid.ezfilter.media.record.ISupportRecord;
 import cn.ezandroid.ezfilter.media.record.RecordableRender;
 
 public class CameraEffectActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
+    private static final int MIN_PREVIEW_WIDTH = 1280;
+    private static final int MIN_PREVIEW_HEIGHT = 720;
+
+    private static final int MAX_PREVIEW_WIDTH = 1920;
+    private static final int MAX_PREVIEW_HEIGHT = 1080;
     private RenderPipeline renderPipeline = new RenderPipeline();
 
     private PathManager pathManager;
@@ -135,7 +148,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
     private boolean isRecord = false;
     private long startTime = 0;
-    private boolean take_photo = true;
     private long timeInMilliseconds = 0;
     private long timeSwapBuff = 0;
     private long updatedTime = 0;
@@ -154,17 +166,9 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         setFullScreen();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_effect);
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        int w = displayMetrics.widthPixels;
-        int h = (w * 3) / 4;
-//        int h = displayMetrics.heightPixels;
-        previewSize = new Size(w, h);
         currentFilter = new FilterRender();
         nameFile = "video" + System.currentTimeMillis() + ".mp4";
 
-        MyApplication.imgHeight = h;
-        MyApplication.imgWidth = w;
-        Log.e("taGa", "w" + w + ", h:" + h);
         initView();
         openCamera();
     }
@@ -203,6 +207,10 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenHeight = displayMetrics.heightPixels;
         screenWidth = displayMetrics.widthPixels;
+
+        MyApplication.imgHeight = screenHeight;
+        MyApplication.imgWidth = screenWidth;
+
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) relativeEffect.getLayoutParams();
         params.width = (screenWidth);
         params.height = (screenHeight * 229) / 1920;
@@ -218,6 +226,17 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
                     .addFilter(currentFilter)
                     .enableRecord(pathVideo, true, true)
                     .into(surfaceFitView);
+
+
+            int w = surfaceFitView.getPreviewWidth();
+            int h = surfaceFitView.getPreviewHeight();
+
+            int w2 = surfaceFitView.getWidth();
+            int h2 = surfaceFitView.getHeight();
+
+            Log.e("TAGTAG", "Width: " + w + ", height:" + h);
+            Log.e("TAGTAG2", "Width: " + w2 + ", height:" + h2);
+
             FBORender startPointRender = renderPipeline.getStartPointRender();
             if (startPointRender instanceof ISupportTakePhoto) {
                 iSupportTakePhoto = (ISupportTakePhoto) startPointRender;
@@ -275,7 +294,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         checkPermission(new String[]{
                         BaseActivity.PER_CAMERA,
                         BaseActivity.PER_READ,
-                        BaseActivity.PER_WRITE
+                        BaseActivity.PER_WRITE,
+                        BaseActivity.PER_AUDIO
                 },
                 new CallBackPermission() {
                     @Override
@@ -397,13 +417,14 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         releaseCamera();
         openCamera();
         if (iSupportRecord != null) {
-            iSupportRecord.enableRecordAudio(true);
+            iSupportRecord.enableRecordAudio(isVoice);
         }
         this.pos = i;
         renderPipeline.removeFilterRender(currentFilter);
         renderPipeline.clearEndPointRenders();
 
         this.currentFilter = GalleryEffect.getEffect(this, i);
+
 
         renderPipeline = EZFilter.input(cameraDevice, previewSize)
                 .addFilter(currentFilter)
@@ -421,6 +442,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void openCamera() {
+
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             CameraCharacteristics cameraCharacteristics =
@@ -431,6 +453,49 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             StreamConfigurationMap map =
                     cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             if (map != null && checkPermission(BaseActivity.PER_CAMERA)) {
+                Size[] sizes = map.getOutputSizes(android.graphics.ImageFormat.JPEG);
+                Size largest = Collections.max(Arrays.asList(sizes), new CompareSizesByArea());
+                int mSensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+                int displayRotation = getWindowManager().getDefaultDisplay().getRotation();
+                boolean swappedDimensions = false;
+                switch (displayRotation) {
+                    case Surface.ROTATION_0:
+                    case Surface.ROTATION_180:
+                        if (mSensorOrientation == 90 || mSensorOrientation == 270) {
+                            swappedDimensions = true;
+                        }
+                        break;
+                    case Surface.ROTATION_90:
+                    case Surface.ROTATION_270:
+                        if (mSensorOrientation == 0 || mSensorOrientation == 180) {
+                            swappedDimensions = true;
+                        }
+                        break;
+                }
+
+
+                Point displaySize = new Point();
+                getWindowManager().getDefaultDisplay().getSize(displaySize);
+                int rotatedPreviewWidth = MIN_PREVIEW_WIDTH;
+                int rotatedPreviewHeight = MIN_PREVIEW_HEIGHT;
+                int maxPreviewWidth = displaySize.x;
+                int maxPreviewHeight = displaySize.y;
+                if (swappedDimensions) {
+                    rotatedPreviewWidth = MIN_PREVIEW_HEIGHT;
+                    rotatedPreviewHeight = MIN_PREVIEW_WIDTH;
+                    maxPreviewWidth = displaySize.y;
+                    maxPreviewHeight = displaySize.x;
+                }
+
+                if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
+                    maxPreviewWidth = MAX_PREVIEW_WIDTH;
+                }
+                if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) {
+                    maxPreviewHeight = MAX_PREVIEW_HEIGHT;
+                }
+                previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
+                        rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
+                        maxPreviewHeight, largest);
                 if (manager != null) {
                     manager.openCamera(isFontCamera ? "1" : "0", stateCallback, null);
                 }
@@ -458,6 +523,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.txtTime.setVisibility(View.VISIBLE);
             this.customHandler.postDelayed(this.updateTimerThread, 0);
             this.iSupportRecord.startRecording();
+            this.iSupportRecord.enableRecordAudio(isVoice);
+
         }
     }
 
@@ -466,6 +533,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         this.timeSwapBuff += this.timeInMilliseconds;
         this.customHandler.removeCallbacks(this.updateTimerThread);
         this.txtTime.setText(getResources().getString(R.string.start_time));
+        this.startTime = 0;
         if (this.iSupportRecord != null) {
             this.iSupportRecord.stopRecording();
             this.lnHint.setVisibility(View.VISIBLE);
@@ -474,9 +542,10 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.btnSwitchMode.setVisibility(View.VISIBLE);
             this.txtTime.setVisibility(View.GONE);
         }
-        ListFileActivity.startIntent(this, pathVideo, ListFileActivity.TYPE_VIDEO);
-        this.nameFile = System.currentTimeMillis() + ".mp4";
-        getVideoFilePath();
+        sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+                Uri.fromFile(new File(pathVideo))));
+        ListFileActivity.startIntent(CameraEffectActivity.this, pathVideo, ListFileActivity.TYPE_VIDEO);
+        finish();
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -505,5 +574,41 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             file.delete();
         }
         pathVideo = file.getAbsolutePath();
+    }
+
+    private Size chooseOptimalSize(Size[] choices, int textureViewWidth, int textureViewHeight,
+                                   int maxWidth, int maxHeight, Size aspectRatio) {
+        List<Size> bigEnough = new ArrayList<>();
+        List<Size> notBigEnough = new ArrayList<>();
+        int w = aspectRatio.getWidth();
+        int h = aspectRatio.getHeight();
+        for (Size option : choices) {
+            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
+                    option.getHeight() == option.getWidth() * h / w) {
+                if (option.getWidth() >= textureViewWidth &&
+                        option.getHeight() >= textureViewHeight) {
+                    bigEnough.add(option);
+                } else {
+                    notBigEnough.add(option);
+                }
+            }
+        }
+
+        if (bigEnough.size() > 0) {
+            return Collections.min(bigEnough, new CompareSizesByArea());
+        } else if (notBigEnough.size() > 0) {
+            return Collections.max(notBigEnough, new CompareSizesByArea());
+        } else {
+            return choices[0];
+        }
+    }
+
+    class CompareSizesByArea implements Comparator<Size> {
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
+                    (long) rhs.getWidth() * rhs.getHeight());
+        }
     }
 }
