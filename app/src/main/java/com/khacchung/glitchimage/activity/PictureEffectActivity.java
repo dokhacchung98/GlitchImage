@@ -39,8 +39,6 @@ import cn.ezandroid.ezfilter.core.environment.SurfaceFitView;
 public class PictureEffectActivity extends BaseActivity implements View.OnTouchListener {
     private static RenderPipeline renderPipeline = new RenderPipeline();
 
-    private MyApplication myApplication;
-
     private int screenWidth;
     private int screenHeight;
 
@@ -116,7 +114,6 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         enableBackButton();
         setTitleToolbar(getResources().getString(R.string.effect_image));
 
-        myApplication = MyApplication.getInstance();
         effectBmp = myApplication.getImgBMP();
         MyApplication.imgWidth = effectBmp.getWidth();
         MyApplication.imgHeight = effectBmp.getHeight();

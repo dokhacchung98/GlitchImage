@@ -14,21 +14,19 @@ import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
 import com.khacchung.glitchimage.customs.CallBackPermission;
+import com.khacchung.glitchimage.customs.EditListenner;
 import com.khacchung.glitchimage.customs.UpdateList;
 import com.khacchung.glitchimage.fragment.ImageCreatedFragment;
 import com.khacchung.glitchimage.fragment.ListFileFragment;
-import com.khacchung.glitchimage.fragment.PreviewFragment;
 import com.khacchung.glitchimage.fragment.VideoCreatedFragment;
 import com.khacchung.glitchimage.util.PathManager;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class ListFileActivity extends BaseActivity implements CallBackClick, UpdateList {
+public class ListFileActivity extends BaseActivity implements CallBackClick, UpdateList, EditListenner {
     public static final String TYPE = "TYPE";
     public static final String PATH = "PATH";
-    public static final int LIST_FILE_FRAGMENT = 0;
-    public static final int PREVIEW_FRAGMENT = 1;
     public static final int TYPE_IMG = 1;
     public static final int TYPE_VIDEO = 2;
     private static final String TAG = ListFileActivity.class.getSimpleName();
@@ -37,12 +35,9 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
     private VideoCreatedFragment videoCreatedFragment;
 
     private ListFileFragment listFileFragment;
-    private PreviewFragment previewFragment;
 
     private ArrayList<String> listImages = new ArrayList<>();
     private ArrayList<String> listVideos = new ArrayList<>();
-
-    private int currentFragment = LIST_FILE_FRAGMENT;
 
     public static void startIntent(BaseActivity activity, String path, int type) {
         Intent intent = new Intent(activity, ListFileActivity.class);
@@ -96,18 +91,15 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         listImages = new ArrayList<>();
         listVideos = new ArrayList<>();
 
-        imageCreatedFragment = new ImageCreatedFragment(this, listImages, this);
+        imageCreatedFragment = new ImageCreatedFragment(this, listImages, this, myApplication, this);
         videoCreatedFragment = new VideoCreatedFragment(this, listVideos, this);
 
         listFileFragment = new ListFileFragment(this, this, imageCreatedFragment, videoCreatedFragment);
-        previewFragment = new PreviewFragment(this, listImages, this);
 
         addFragment();
-        switchFragment(LIST_FILE_FRAGMENT);
 
         getAllImagesIsCreated();
         getAllVideosIsCreated();
-
     }
 
     @Override
@@ -120,39 +112,14 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
     private void addFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_render, listFileFragment);
-        transaction.add(R.id.fragment_render, previewFragment);
-        transaction.commit();
-    }
-
-    private void hidenAllFramgent() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.hide(listFileFragment);
-        transaction.hide(previewFragment);
-        transaction.commit();
-    }
-
-    public void switchFragment(int pos) {
-        currentFragment = pos;
-        hidenAllFramgent();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        switch (pos) {
-            case LIST_FILE_FRAGMENT:
-                transaction.show(listFileFragment);
-                break;
-            case PREVIEW_FRAGMENT:
-                transaction.show(previewFragment);
-                break;
-        }
         transaction.commit();
     }
 
     @Override
     public void ClickImage(int pos) {
-        if (previewFragment != null) {
-            previewFragment.update(listImages);
+        if (pos >= 0 && pos < listImages.size()) {
+            PreviewActivity.startIntent(this, listImages.get(pos), ListFileActivity.TYPE_IMG);
         }
-        switchFragment(PREVIEW_FRAGMENT);
-        previewFragment.scrollToPos(pos);
     }
 
     @Override
@@ -168,14 +135,6 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (currentFragment == PREVIEW_FRAGMENT) {
-            switchFragment(LIST_FILE_FRAGMENT);
-        } else
-            super.onBackPressed();
     }
 
     private void getAllVideosIsCreated() {
@@ -234,5 +193,15 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         if (imageCreatedFragment != null) {
             imageCreatedFragment.updateListImage(list);
         }
+    }
+
+    @Override
+    public void editImageAtPos(int pos) {
+        runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+    }
+
+    @Override
+    public void editVideoAtPos(int pos) {
+
     }
 }

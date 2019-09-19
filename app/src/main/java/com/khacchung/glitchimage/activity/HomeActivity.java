@@ -27,10 +27,10 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private RelativeLayout rlCamera;
     private RelativeLayout rlPhoto;
     private RelativeLayout rlList;
+    private ImageButton btnExit;
     private ImageButton btnShare;
     private ImageButton btnMore;
     private ImageButton btnRate;
-    private int screenHeight;
 
     private MyApplication myApplication;
 
@@ -52,6 +52,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         rlCamera = findViewById(R.id.rl_camera);
         rlPhoto = findViewById(R.id.rl_photo);
         rlList = findViewById(R.id.rl_list);
+        btnExit = findViewById(R.id.btn_exit);
         btnMore = findViewById(R.id.btn_more);
         btnShare = findViewById(R.id.btn_share);
         btnRate = findViewById(R.id.btn_rate);
@@ -61,10 +62,8 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         rlCamera.setOnClickListener(this);
         btnRate.setOnClickListener(this);
         btnShare.setOnClickListener(this);
+        btnExit.setOnClickListener(this);
         btnMore.setOnClickListener(this);
-
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        screenHeight = displayMetrics.heightPixels;
     }
 
     @Override
@@ -75,6 +74,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.rl_photo:
                 gotoChosePhoto();
+                break;
+            case R.id.btn_exit:
+                onBackPressed();
                 break;
             case R.id.rl_list:
                 gotoListFileCreated();
@@ -181,15 +183,8 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null && requestCode == REQUEST_CODE_PICK_IMAGE) {
-            myApplication.setPathImage(data.getData().toString());
             createFolder();
-            try {
-                Bitmap bitmap = AdjustBitmap.getCorrectlyOrientedImage(this, data.getData(), screenHeight);
-                myApplication.setImgBMP(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            PictureEffectActivity.startIntent(HomeActivity.this);
+            gotoGlitchImage(data.getData().toString());
         }
     }
 

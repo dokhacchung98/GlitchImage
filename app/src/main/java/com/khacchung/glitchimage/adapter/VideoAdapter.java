@@ -1,5 +1,8 @@
 package com.khacchung.glitchimage.adapter;
 
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder> {
@@ -45,9 +49,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder
 //
 //        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(picturePath, MediaStore.Video.Thumbnails.MICRO_KIND);
 
+        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(listVieos.get(position), MediaStore.Video.Thumbnails.MINI_KIND);
+
         holder.imgThumbnail.setOnClickListener(view -> callBack.ClickVideo(position));
-//        holder.imgThumbnail.setImageBitmap(bitmap);
-        holder.imgThumbnail.setImageResource(R.drawable.ic_voice);
+        holder.imgThumbnail.setImageBitmap(bitmap);
     }
 
     @Override

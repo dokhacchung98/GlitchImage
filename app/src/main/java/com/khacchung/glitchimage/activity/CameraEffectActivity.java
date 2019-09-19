@@ -2,14 +2,17 @@ package com.khacchung.glitchimage.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -18,7 +21,6 @@ import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -117,6 +119,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     };
     private EffectAdapter effectAdapter;
 
+    private CameraManager manager;
+
     private RelativeLayout relativeEffect;
     private RecyclerView recyclerView;
     private SurfaceFitView surfaceFitView;
@@ -151,6 +155,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private long timeInMilliseconds = 0;
     private long timeSwapBuff = 0;
     private long updatedTime = 0;
+    private boolean isFlashAvailable;
+    private String mCameraId;
 
     private Handler customHandler = new Handler();
 
@@ -168,7 +174,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         setContentView(R.layout.activity_camera_effect);
         currentFilter = new FilterRender();
         nameFile = "video" + System.currentTimeMillis() + ".mp4";
-
+        isFlashAvailable = getApplicationContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         initView();
         openCamera();
     }
@@ -226,16 +233,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
                     .addFilter(currentFilter)
                     .enableRecord(pathVideo, true, true)
                     .into(surfaceFitView);
-
-
-            int w = surfaceFitView.getPreviewWidth();
-            int h = surfaceFitView.getPreviewHeight();
-
-            int w2 = surfaceFitView.getWidth();
-            int h2 = surfaceFitView.getHeight();
-
-            Log.e("TAGTAG", "Width: " + w + ", height:" + h);
-            Log.e("TAGTAG2", "Width: " + w2 + ", height:" + h2);
 
             FBORender startPointRender = renderPipeline.getStartPointRender();
             if (startPointRender instanceof ISupportTakePhoto) {
@@ -330,6 +327,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
     private void startTakeOrRecord() {
         if (isTakePhoto) {
+            openFlash();
             saveImage();
         } else {
             if (!isRecord) {
@@ -337,6 +335,27 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             } else {
                 stopRecording();
             }
+        }
+    }
+
+    private void openFlash() {
+        if (isFlash && !isFontCamera && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Handler handlerOpenFlash = new Handler();
+            try {
+                manager.setTorchMode(mCameraId, true);
+                Log.e("KOKO", "open flash");
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+            handlerOpenFlash.postDelayed(() -> {
+                try {
+                    manager.setTorchMode(mCameraId, false);
+                    Log.e("KOKO", "close flash");
+                    //todo: fix flash
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
+            }, 1000);
         }
     }
 
@@ -428,7 +447,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
         renderPipeline = EZFilter.input(cameraDevice, previewSize)
                 .addFilter(currentFilter)
-                .enableRecord(pathVideo, true, true)
+                .enableRecord(pathVideo, true, isVoice)
                 .into(surfaceFitView);
         FBORender startPointRender = renderPipeline.getStartPointRender();
         if (startPointRender instanceof ISupportTakePhoto) {
@@ -443,11 +462,12 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
     private void openCamera() {
 
-        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             CameraCharacteristics cameraCharacteristics =
                     null;
             if (manager != null) {
+                mCameraId = manager.getCameraIdList()[0];
                 cameraCharacteristics = manager.getCameraCharacteristics(isFontCamera ? "1" : "0");
             }
             StreamConfigurationMap map =
@@ -518,7 +538,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.startTime = SystemClock.uptimeMillis();
             this.lnHint.setVisibility(View.GONE);
             this.imgListPhoto.setVisibility(View.GONE);
-            this.relativeEffect.setVisibility(View.GONE);
+            this.recyclerView.setVisibility(View.GONE);
             this.btnSwitchMode.setVisibility(View.GONE);
             this.txtTime.setVisibility(View.VISIBLE);
             this.customHandler.postDelayed(this.updateTimerThread, 0);
@@ -538,7 +558,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.iSupportRecord.stopRecording();
             this.lnHint.setVisibility(View.VISIBLE);
             this.imgListPhoto.setVisibility(View.VISIBLE);
-            this.relativeEffect.setVisibility(View.VISIBLE);
+            this.recyclerView.setVisibility(View.VISIBLE);
             this.btnSwitchMode.setVisibility(View.VISIBLE);
             this.txtTime.setVisibility(View.GONE);
         }
@@ -610,5 +630,11 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
                     (long) rhs.getWidth() * rhs.getHeight());
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        releaseCamera();
+        super.onDestroy();
     }
 }

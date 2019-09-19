@@ -2,15 +2,20 @@ package com.khacchung.glitchimage.base;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +27,17 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.khacchung.glitchimage.BuildConfig;
+import com.khacchung.glitchimage.activity.HomeActivity;
+import com.khacchung.glitchimage.activity.PictureEffectActivity;
+import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.customs.CallBackEffect;
 import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.R;
+import com.khacchung.glitchimage.customs.RemoveCallBack;
+import com.khacchung.glitchimage.util.AdjustBitmap;
+
+import java.io.File;
+import java.io.IOException;
 
 @SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements CallBackEffect {
@@ -36,14 +49,18 @@ public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     public static final int CODE_PERMISSION = 12;
 
     private CallBackPermission callBackPermission;
+    public int screenHeight;
+    public MyApplication myApplication;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         dialog = new ProgressDialog(this);
         dialog.setMessage(getString(R.string.please_wait));
         dialog.setCancelable(false);
+        myApplication = MyApplication.getInstance();
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        screenHeight = displayMetrics.heightPixels;
     }
 
     protected void setMessageDialog(String text) {
@@ -223,5 +240,51 @@ public class BaseActivity extends AppCompatActivity implements CallBackEffect {
         } catch (Exception e) {
             Toast.makeText(this, getResources().getString(R.string.have_error), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void removeFile(String path, RemoveCallBack removeCallBack) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.dialog_alert_save);
+
+        TextView txtAlert = dialog.findViewById(R.id.txt_alert);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnSave.setText(getResources().getString(R.string.remove));
+        txtAlert.setText(getResources().getString(R.string.ques_remove));
+        btnSave.setOnClickListener(v -> {
+            File file = new File(path);
+            if (file.exists()) {
+                file.delete();
+            }
+            sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE"
+                    , Uri.fromFile(file)));
+            removeCallBack.removeFileSuccess();
+            dialog.cancel();
+            dialog.dismiss();
+        });
+        btnCancel.setOnClickListener(v -> {
+            if (dialog.isShowing()) {
+                dialog.cancel();
+                dialog.dismiss();
+            }
+            removeCallBack.noRemove();
+        });
+        Window window = dialog.getWindow();
+        window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+    }
+
+    public void gotoGlitchImage(String path) {
+        myApplication.setPathImage(path);
+        try {
+            Bitmap bitmap = AdjustBitmap.getCorrectlyOrientedImage(this, Uri.fromFile(new File(path)), screenHeight);
+            myApplication.setImgBMP(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PictureEffectActivity.startIntent(this);
     }
 }

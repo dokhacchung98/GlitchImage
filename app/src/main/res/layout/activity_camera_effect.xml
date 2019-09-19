@@ -49,14 +49,25 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/_64sdp"
         android:layout_above="@+id/rl_bot"
+        android:background="@color/colorBlack"
         android:elevation="4dp">
+
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="@string/start_time"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_16sdp"
+            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcv_filters"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:background="@color/colorBlack" />
+            android:layout_centerInParent="true" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -105,16 +116,6 @@
                 android:src="@drawable/ic_voice"
                 android:visibility="gone" />
         </RelativeLayout>
-
-        <TextView
-            android:id="@+id/txt_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:text="@string/start_time"
-            android:textColor="@color/colorWhite"
-            android:visibility="gone" />
     </RelativeLayout>
 
     <cn.ezandroid.ezfilter.core.environment.SurfaceFitView

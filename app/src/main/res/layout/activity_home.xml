@@ -2,12 +2,111 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackgroundDark">
+    android:background="@drawable/background">
 
-    <LinearLayout
+    <ImageButton
+        android:id="@+id/btn_exit"
+        android:layout_width="38dp"
+        android:layout_height="37dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_32sdp"
+        android:background="@drawable/ic_exit"
+        android:padding="@dimen/_8sdp" />
+
+    <ImageView
+        android:id="@+id/img_logo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/_32sdp"
+        android:src="@drawable/logo2" />
+
+    <LinearLayout
+        android:id="@+id/ln_bot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_exit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_32sdp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btn_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_24sdp"
+                android:background="@null"
+                android:src="@drawable/ic_share" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/share_app"
+                android:textColor="@color/colorWhite" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btn_more"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_24sdp"
+                android:background="@null"
+                android:src="@drawable/ic_more" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/more"
+                android:textColor="@color/colorWhite" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btn_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_24sdp"
+                android:background="@null"
+                android:src="@drawable/ic_rate" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rate_app"
+                android:textColor="@color/colorWhite" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ln_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/img_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_10sdp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -33,19 +132,6 @@
                     android:src="@drawable/ic_camera" />
             </RelativeLayout>
 
-            <ImageButton
-                android:id="@+id/btn_share"
-                android:src="@drawable/ic_share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:layout_marginTop="@dimen/_24sdp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/share_app"
-                android:textColor="@color/colorWhite" />
         </LinearLayout>
 
         <LinearLayout
@@ -71,19 +157,6 @@
                     android:src="@drawable/ic_photos" />
             </RelativeLayout>
 
-            <ImageButton
-                android:src="@drawable/ic_more"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btn_more"
-                android:background="@null"
-                android:layout_marginTop="@dimen/_24sdp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/more"
-                android:textColor="@color/colorWhite" />
         </LinearLayout>
 
         <LinearLayout
@@ -101,29 +174,15 @@
                 android:background="@drawable/button_list">
 
                 <ImageView
-                    android:layout_width="@dimen/_32sdp"
-                    android:layout_height="@dimen/_32sdp"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
                     android:layout_centerInParent="true"
                     android:layout_marginHorizontal="@dimen/_24sdp"
                     android:layout_marginVertical="@dimen/_16sdp"
                     android:src="@drawable/ic_list" />
             </RelativeLayout>
 
-            <ImageButton
-                android:src="@drawable/ic_rate"
-                android:background="@null"
-                android:id="@+id/btn_rate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_24sdp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/rate_app"
-                android:textColor="@color/colorWhite" />
         </LinearLayout>
-
-
     </LinearLayout>
+
 </RelativeLayout>
