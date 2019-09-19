@@ -1,7 +1,6 @@
 package com.khacchung.glitchimage.activity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -16,12 +15,8 @@ import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
 import com.devbrackets.android.exomedia.ui.widget.VideoView;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.khacchung.glitchimage.R;
-import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.RemoveCallBack;
-import com.khacchung.glitchimage.util.AdjustBitmap;
-
-import java.io.IOException;
 
 public class PreviewActivity extends BaseActivity implements OnPreparedListener, OnSeekCompletionListener {
 
@@ -78,7 +73,7 @@ public class PreviewActivity extends BaseActivity implements OnPreparedListener,
             removeFile(myPath);
         } else if (item.getItemId() == R.id.action_edit) {
             if (myType == ListFileActivity.TYPE_IMG) {
-                gotoGlitchImage(myPath);
+                runOnUiThread(() -> gotoGlitchImage(myPath));
             }
         }
         return super.onOptionsItemSelected(item);

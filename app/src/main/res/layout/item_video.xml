@@ -4,15 +4,27 @@
     android:layout_height="@dimen/_128sdp"
     android:padding="@dimen/_2sdp">
 
-    <ImageView
-        android:id="@+id/img_thumbnail"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+    <ImageButton
+        android:id="@+id/btn_remove"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:background="@drawable/background_button"
+        android:elevation="@dimen/_2sdp"
+        android:src="@drawable/ic_delete_24" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:src="@drawable/ic_play" />
+
+    <ImageView
+        android:id="@+id/img_thumbnail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
 </RelativeLayout>

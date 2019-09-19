@@ -6,6 +6,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -14,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
+import com.khacchung.glitchimage.customs.RemoveCallBack;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder> {
@@ -23,7 +24,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder
     private CallBackClick callBack;
     private ArrayList<String> listVieos;
 
-    public VideoAdapter(BaseActivity baseActivity, ArrayList<String> listImages, CallBackClick callBack) {
+    public VideoAdapter(BaseActivity baseActivity,
+                        ArrayList<String> listImages,
+                        CallBackClick callBack) {
         this.baseActivity = baseActivity;
         this.listVieos = listImages;
         this.callBack = callBack;
@@ -39,20 +42,24 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-//        String[] filePathColumn = {MediaStore.Images.Media.DATA};
-//        Cursor cursor = baseActivity.getContentResolver()
-//                .query(Uri.parse(listVieos.get(position)), filePathColumn, null, null, null);
-//        cursor.moveToFirst();
-//        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//        String picturePath = cursor.getString(columnIndex);
-//        cursor.close();
-//
-//        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(picturePath, MediaStore.Video.Thumbnails.MICRO_KIND);
-
-        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(listVieos.get(position), MediaStore.Video.Thumbnails.MINI_KIND);
+        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(listVieos.get(position),
+                MediaStore.Video.Thumbnails.MINI_KIND);
 
         holder.imgThumbnail.setOnClickListener(view -> callBack.ClickVideo(position));
         holder.imgThumbnail.setImageBitmap(bitmap);
+        holder.btnRemove.setOnClickListener(v -> baseActivity.removeFile(listVieos.get(position),
+                new RemoveCallBack() {
+                    @Override
+                    public void removeFileSuccess() {
+                        listVieos.remove(position);
+                        notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void noRemove() {
+
+                    }
+                }));
     }
 
     @Override
@@ -62,9 +69,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.MyViewHolder
 
     class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumbnail;
+        ImageButton btnRemove;
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
+            btnRemove = itemView.findViewById(R.id.btn_remove);
             imgThumbnail = itemView.findViewById(R.id.img_thumbnail);
         }
     }

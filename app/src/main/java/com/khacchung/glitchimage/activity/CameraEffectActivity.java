@@ -2,22 +2,18 @@ package com.khacchung.glitchimage.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -126,8 +122,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private SurfaceFitView surfaceFitView;
     private ImageButton btnBack;
     private ImageButton btnSwitchCam;
-    private ImageButton btnSwitchFlash;
-    private ImageButton btnSwitchVoice;
     private CircularImageView imgListPhoto;
     private ImageButton btnSwitchMode;
     private ImageButton btnTake;
@@ -137,8 +131,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private int screenHeight;
     private int screenWidth;
     private boolean isFontCamera = false;
-    private boolean isVoice = true;
-    private boolean isFlash = true;
     private boolean isTakePhoto = true;
 
     private FilterRender currentFilter;
@@ -155,7 +147,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private long timeInMilliseconds = 0;
     private long timeSwapBuff = 0;
     private long updatedTime = 0;
-    private boolean isFlashAvailable;
     private String mCameraId;
 
     private Handler customHandler = new Handler();
@@ -174,8 +165,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         setContentView(R.layout.activity_camera_effect);
         currentFilter = new FilterRender();
         nameFile = "video" + System.currentTimeMillis() + ".mp4";
-        isFlashAvailable = getApplicationContext().getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         initView();
         openCamera();
     }
@@ -191,16 +180,12 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
         btnBack = findViewById(R.id.btn_back);
         btnSwitchCam = findViewById(R.id.btn_switch_cam);
-        btnSwitchFlash = findViewById(R.id.btn_switch_flash);
-        btnSwitchVoice = findViewById(R.id.btn_switch_mic);
         imgListPhoto = findViewById(R.id.img_list);
         btnSwitchMode = findViewById(R.id.btn_switch_mode);
         btnTake = findViewById(R.id.btn_take);
 
         btnBack.setOnClickListener(this);
         btnSwitchCam.setOnClickListener(this);
-        btnSwitchFlash.setOnClickListener(this);
-        btnSwitchVoice.setOnClickListener(this);
         imgListPhoto.setOnClickListener(this);
         btnSwitchMode.setOnClickListener(this);
         btnTake.setOnClickListener(this);
@@ -267,12 +252,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             case R.id.btn_switch_cam:
                 switchCamera();
                 break;
-            case R.id.btn_switch_flash:
-                switchFlashMode();
-                break;
-            case R.id.btn_switch_mic:
-                switchVoiceMode();
-                break;
             case R.id.img_list:
                 gotoListFileCreatedActivity();
                 break;
@@ -319,15 +298,13 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private void switchModeCamera() {
         isTakePhoto = !isTakePhoto;
 
-        btnTake.setImageResource(isTakePhoto ? R.drawable.background_button_take_photo : R.drawable.background_button_record);
-        btnSwitchVoice.setVisibility(isTakePhoto ? View.GONE : View.VISIBLE);
-        btnSwitchFlash.setVisibility(isTakePhoto ? View.VISIBLE : View.GONE);
+        btnTake.setImageResource(isTakePhoto ?
+                R.drawable.background_button_take_photo : R.drawable.background_button_record);
         btnSwitchMode.setImageResource(isTakePhoto ? R.drawable.ic_video : R.drawable.ic_camera);
     }
 
     private void startTakeOrRecord() {
         if (isTakePhoto) {
-            openFlash();
             saveImage();
         } else {
             if (!isRecord) {
@@ -338,39 +315,8 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    private void openFlash() {
-        if (isFlash && !isFontCamera && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Handler handlerOpenFlash = new Handler();
-            try {
-                manager.setTorchMode(mCameraId, true);
-                Log.e("KOKO", "open flash");
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
-            }
-            handlerOpenFlash.postDelayed(() -> {
-                try {
-                    manager.setTorchMode(mCameraId, false);
-                    Log.e("KOKO", "close flash");
-                    //todo: fix flash
-                } catch (CameraAccessException e) {
-                    e.printStackTrace();
-                }
-            }, 1000);
-        }
-    }
-
     private void gotoListFileCreatedActivity() {
         ListFileActivity.startIntent(this, null, 0);
-    }
-
-    private void switchVoiceMode() {
-        isVoice = !isVoice;
-        btnSwitchVoice.setImageResource(isVoice ? R.drawable.ic_voice : R.drawable.ic_voice_mute);
-    }
-
-    private void switchFlashMode() {
-        isFlash = !isFlash;
-        btnSwitchFlash.setImageResource(isFlash ? R.drawable.ic_flash_on : R.drawable.ic_flash_off);
     }
 
     private void switchCamera() {
@@ -436,7 +382,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         releaseCamera();
         openCamera();
         if (iSupportRecord != null) {
-            iSupportRecord.enableRecordAudio(isVoice);
+            iSupportRecord.enableRecordAudio(true);
         }
         this.pos = i;
         renderPipeline.removeFilterRender(currentFilter);
@@ -447,7 +393,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
         renderPipeline = EZFilter.input(cameraDevice, previewSize)
                 .addFilter(currentFilter)
-                .enableRecord(pathVideo, true, isVoice)
+                .enableRecord(pathVideo, true, true)
                 .into(surfaceFitView);
         FBORender startPointRender = renderPipeline.getStartPointRender();
         if (startPointRender instanceof ISupportTakePhoto) {
@@ -543,7 +489,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.txtTime.setVisibility(View.VISIBLE);
             this.customHandler.postDelayed(this.updateTimerThread, 0);
             this.iSupportRecord.startRecording();
-            this.iSupportRecord.enableRecordAudio(isVoice);
+            this.iSupportRecord.enableRecordAudio(true);
 
         }
     }

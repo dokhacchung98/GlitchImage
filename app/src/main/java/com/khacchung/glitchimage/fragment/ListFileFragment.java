@@ -12,6 +12,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.khacchung.glitchimage.R;
+import com.khacchung.glitchimage.activity.ListFileActivity;
 import com.khacchung.glitchimage.adapter.ViewPagerAdapter;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
@@ -53,6 +54,9 @@ public class ListFileFragment extends Fragment {
         if (tabLayout.getTabCount() == 2) {
             tabLayout.getTabAt(0).setIcon(R.drawable.ic_picture);
             tabLayout.getTabAt(1).setIcon(R.drawable.ic_film);
+        }
+        if (ListFileActivity.isVideo) {
+            viewPager.setCurrentItem(1);
         }
         return view;
     }

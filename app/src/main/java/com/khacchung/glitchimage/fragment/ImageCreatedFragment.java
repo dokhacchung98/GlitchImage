@@ -52,7 +52,7 @@ public class ImageCreatedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_image, container, false);
         recyclerViewImage = view.findViewById(R.id.rcv_image);
         txtEmpty = view.findViewById(R.id.txt_empty);
-        imageAdapter = new ImageAdapter(baseActivity, listUriImages, myApplication, callBackClick, editListenner);
+        imageAdapter = new ImageAdapter(baseActivity, listUriImages, callBackClick, editListenner);
         recyclerViewImage.setAdapter(imageAdapter);
         recyclerViewImage.setLayoutManager(new GridLayoutManager(baseActivity, 2));
         txtEmpty.setVisibility(listUriImages.isEmpty() ? View.VISIBLE : View.GONE);

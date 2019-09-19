@@ -2,6 +2,7 @@ package com.khacchung.glitchimage.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
 
     private ArrayList<String> listImages = new ArrayList<>();
     private ArrayList<String> listVideos = new ArrayList<>();
+    public static boolean isVideo = false;
 
     public static void startIntent(BaseActivity activity, String path, int type) {
         Intent intent = new Intent(activity, ListFileActivity.class);
@@ -60,7 +62,10 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         String path = intent.getStringExtra(PATH);
         int type = intent.getIntExtra(TYPE, 0);
         if (path != null && (type == TYPE_IMG || type == TYPE_VIDEO)) {
-            PreviewActivity.startIntent(this, path, type);
+//            PreviewActivity.startIntent(this, path, type);
+            isVideo = true;
+        } else {
+            isVideo = false;
         }
 
         checkPermission(new String[]{
