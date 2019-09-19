@@ -8,4 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/colorPrimaryDark</item>
+        <item name="tabIndicatorHeight">6dp</item>
+        <item name="tabBackground">@color/colorPrimary</item>
+        <item name="tabIconTint">@color/colorWhite</item>
+        <item name="tabTextColor">#81FFFFFF</item>
+        <item name="tabSelectedTextColor">@color/colorWhite</item>
+    </style>
 </resources>

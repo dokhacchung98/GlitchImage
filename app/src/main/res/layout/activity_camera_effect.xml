@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackgroundDark">
+
+    <RelativeLayout
+        android:id="@+id/rl_bot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorBlack"
+        android:elevation="4dp"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_24sdp">
+
+        <ImageButton
+            android:id="@+id/btn_switch_mode"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_32sdp"
+            android:background="@drawable/border_button_cam"
+            android:src="@drawable/ic_video" />
+
+        <ImageButton
+            android:id="@+id/btn_take"
+            android:layout_width="@dimen/_56sdp"
+            android:layout_height="@dimen/_56sdp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/border_button_cam"
+            android:src="@drawable/background_button_take_photo" />
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/img_list"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginLeft="@dimen/_32sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:src="@drawable/ic_1"
+            app:civ_border_color="@color/colorWhite"
+            app:civ_border_width="1dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_effects"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_64sdp"
+        android:layout_above="@+id/rl_bot"
+        android:background="@color/colorBlack"
+        android:elevation="4dp">
+
+        <TextView
+            android:id="@+id/txt_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="@string/start_time"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_16sdp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_filters"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_top"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorBlack"
+        android:elevation="4dp">
+
+        <RelativeLayout
+            android:id="@+id/rl_function"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="@dimen/_24sdp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:src="@drawable/ic_back" />
+
+            <ImageButton
+                android:id="@+id/btn_switch_cam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:src="@drawable/ic_switch" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <cn.ezandroid.ezfilter.core.environment.SurfaceFitView
+        android:id="@+id/render_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/rl_top" />
+
+</RelativeLayout>

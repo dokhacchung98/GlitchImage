@@ -1797,7 +1797,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 return true;
             }
             // Notify the owning thread that it should release the context.
-            // TODO: implement a fairness policy. Currently
             // if the owning thread is drawing continuously it will just
             // reacquire the EGL context.
             if (mEglOwner != null) {

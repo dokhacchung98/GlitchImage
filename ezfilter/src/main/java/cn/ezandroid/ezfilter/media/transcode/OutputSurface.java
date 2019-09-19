@@ -52,7 +52,6 @@ public class OutputSurface implements SurfaceTexture.OnFrameAvailableListener {
                     // stalling the test if it doesn't arrive.
                     mFrameSyncObject.wait(TIMEOUT_MS);
                     if (!mFrameAvailable) {
-                        // TODO: if "spurious wakeup", continue while loop
                         throw new RuntimeException("Surface frame wait timed out");
                     }
                 } catch (InterruptedException ie) {
