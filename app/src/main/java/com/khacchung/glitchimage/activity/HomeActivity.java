@@ -2,10 +2,8 @@ package com.khacchung.glitchimage.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -16,10 +14,7 @@ import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
-import com.khacchung.glitchimage.util.AdjustBitmap;
 import com.khacchung.glitchimage.util.PathManager;
-
-import java.io.IOException;
 
 public class HomeActivity extends BaseActivity implements View.OnClickListener {
 
@@ -109,6 +104,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 new CallBackPermission() {
                     @Override
                     public void grantedFullPermission() {
+                        showLoading();
                         createFolder();
                         ListFileActivity.startIntent(HomeActivity.this, null, 0);
                     }
@@ -195,5 +191,12 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         if (!pathManager.checkFolderExists(PathManager.FOLDER_VIDEO)) {
             pathManager.createFolderVideo();
         }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cancleLoading();
     }
 }

@@ -105,6 +105,8 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
 
         getAllImagesIsCreated();
         getAllVideosIsCreated();
+
+        cancleLoading();
     }
 
     @Override

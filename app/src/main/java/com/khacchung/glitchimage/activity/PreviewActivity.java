@@ -21,11 +21,13 @@ import com.khacchung.glitchimage.customs.RemoveCallBack;
 public class PreviewActivity extends BaseActivity implements OnPreparedListener, OnSeekCompletionListener {
 
     private int screenHeight;
+    private static int CURRENT_TYPE = ListFileActivity.TYPE_IMG;
 
     public static void startIntent(BaseActivity baseActivity, String path, int type) {
         Intent intent = new Intent(baseActivity, PreviewActivity.class);
         intent.putExtra(ListFileActivity.TYPE, type);
         intent.putExtra(ListFileActivity.PATH, path);
+        PreviewActivity.CURRENT_TYPE = type;
         baseActivity.startActivity(intent);
     }
 
@@ -81,7 +83,11 @@ public class PreviewActivity extends BaseActivity implements OnPreparedListener,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_share_remove, menu);
+        if (CURRENT_TYPE == ListFileActivity.TYPE_IMG) {
+            getMenuInflater().inflate(R.menu.menu_share_remove_edit, menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_share_remove, menu);
+        }
         return true;
     }
 
