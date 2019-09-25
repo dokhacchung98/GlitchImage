@@ -24,9 +24,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private RelativeLayout rlPhoto;
     private RelativeLayout rlList;
     private ImageButton btnExit;
-    private ImageButton btnShare;
-    private ImageButton btnMore;
-    private ImageButton btnRate;
+    private LinearLayout btnShare;
+    private LinearLayout btnMore;
+    private LinearLayout btnRate;
 
     private LinearLayout lnMain;
     private LinearLayout lnBot;
@@ -55,9 +55,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         rlPhoto = findViewById(R.id.rl_photo);
         rlList = findViewById(R.id.rl_list);
         btnExit = findViewById(R.id.btn_exit);
-        btnMore = findViewById(R.id.btn_more);
-        btnShare = findViewById(R.id.btn_share);
-        btnRate = findViewById(R.id.btn_rate);
+        btnMore = findViewById(R.id.ln_more);
+        btnShare = findViewById(R.id.ln_share);
+        btnRate = findViewById(R.id.ln_rate);
 
         lnMain = findViewById(R.id.ln_main);
         lnBot = findViewById(R.id.ln_bot);
@@ -113,13 +113,13 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
             case R.id.rl_list:
                 gotoListFileCreated();
                 break;
-            case R.id.btn_share:
+            case R.id.ln_share:
                 intentShareApp();
                 break;
-            case R.id.btn_more:
+            case R.id.ln_more:
                 moreApp();
                 break;
-            case R.id.btn_rate:
+            case R.id.ln_rate:
                 rateApp();
                 break;
         }

@@ -28,11 +28,13 @@
             android:layout_alignParentBottom="true"
             android:background="@color/colorBlack">
 
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcv_filters"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true" />
+
         </RelativeLayout>
 
         <RelativeLayout

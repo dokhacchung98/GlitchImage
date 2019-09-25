@@ -8,6 +8,7 @@
     <color name="colorNoneSeleted">#C9C9C9</color>
     <color name="colorRed">#FF2B2B</color>
     <color name="colorBlack">#000</color>
+    <color name="colorBlack2">#1A1A1A</color>
     <color name="colorError">#F44336</color>
     <color name="colorButtonCamera">#2196F3</color>
     <color name="colorButtonCameraPress">#007EDD</color>

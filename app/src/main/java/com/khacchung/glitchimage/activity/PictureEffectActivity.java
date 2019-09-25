@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -360,29 +359,4 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         }
         return true;
     }
-
-    private boolean isEndAnim = false;
-
-//    @Override
-//    public void onAnimationStart(Animation animation) {
-//    }
-//
-//    @Override
-//    public void onAnimationEnd(Animation animation) {
-//        if (isEndAnim) {
-//            lnHand.setVisibility(View.GONE);
-//            animation1.reset();
-//            isEndAnim = false;
-//            return;
-//        }
-//        animation1.reset();
-//        lnHand.setAnimation(animation2);
-//        isEndAnim = true;
-//        animation2.start();
-//    }
-//
-//    @Override
-//    public void onAnimationRepeat(Animation animation) {
-//
-//    }
 }

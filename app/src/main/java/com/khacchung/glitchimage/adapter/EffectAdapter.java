@@ -16,13 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.customs.CallBackEffect;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EffectAdapter extends RecyclerView.Adapter<EffectAdapter.MyViewHolder> {
     private Context context;
     private int[] icon;
-    private List<String> list = new ArrayList<>();
+    private List<String> list;
     private int pos = 0;
     private DisplayMetrics displayMetrics;
     private int screenHeight;
@@ -51,7 +50,7 @@ public class EffectAdapter extends RecyclerView.Adapter<EffectAdapter.MyViewHold
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         if (position == pos) {
             holder.imgMain2.setVisibility(View.VISIBLE);
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.colorPrimaryDark));
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.colorWhite));
         } else {
             holder.imgMain2.setVisibility(View.GONE);
             holder.txtName.setTextColor(context.getResources().getColor(R.color.colorPrimary));
