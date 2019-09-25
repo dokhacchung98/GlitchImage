@@ -14,12 +14,15 @@
     <string name="move_fingure">Move Fingure On Image To See Effects</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="exit">Exit</string>
     <string name="alert">Warning</string>
     <string name="ques_save">Do you want save image before exiting the screen?</string>
     <string name="ques_remove">Do you want remove file?</string>
+    <string name="ques_exit">Do you want exit application?</string>
     <string name="save_success">Save image successful with path: </string>
     <string name="have_error">There was an error, please try again..</string>
     <string name="empty_file_list">Empty file list</string>
     <string name="preview">Photo View</string>
     <string name="start_time">00:00</string>
+    <string name="choose_image">Choose Image</string>
 </resources>

@@ -25,25 +25,47 @@
             android:id="@+id/relative_effects"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_64sdp"
-            android:layout_alignParentBottom="true">
+            android:layout_alignParentBottom="true"
+            android:background="@color/colorBlack">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcv_filters"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_centerInParent="true"
-                android:background="#333333" />
+                android:layout_centerInParent="true" />
         </RelativeLayout>
 
-        <TextView
+        <RelativeLayout
+            android:id="@+id/rl_move_hand"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@+id/relative_effects"
-            android:background="#0000"
-            android:gravity="center"
             android:padding="10dp"
-            android:text="@string/move_fingure"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white">
+
+            <LinearLayout
+                android:id="@+id/ln_hand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/txt_move"
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="@dimen/_86sdp"
+                    android:layout_height="@dimen/_86sdp"
+                    android:src="@drawable/ic_hand_move" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txt_move"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                android:text="@string/move_fingure"
+                android:textColor="@color/colorWhite" />
+        </RelativeLayout>
     </RelativeLayout>
 </RelativeLayout>

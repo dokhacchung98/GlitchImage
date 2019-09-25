@@ -11,6 +11,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -278,13 +279,19 @@ public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     }
 
     public void gotoGlitchImage(String path) {
-        myApplication.setPathImage(path);
-        try {
-            Bitmap bitmap = AdjustBitmap.getCorrectlyOrientedImage(this, Uri.fromFile(new File(path)), screenHeight);
-            myApplication.setImgBMP(bitmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        PictureEffectActivity.startIntent(this);
+        runOnUiThread(() -> {
+            myApplication.setPathImage(path);
+            try {
+                Bitmap bitmap = AdjustBitmap.getCorrectlyOrientedImage(this, Uri.fromFile(new File(path)), screenHeight);
+                myApplication.setImgBMP(bitmap);
+                MyApplication.imgWidth = bitmap.getWidth();
+                MyApplication.imgHeight = bitmap.getHeight();
+                Log.e("TAG", "width: " + bitmap.getWidth() + ", height: " + bitmap.getHeight());
+                PictureEffectActivity.startIntent(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("TAG", "error: " + e.getMessage());
+            }
+        });
     }
 }

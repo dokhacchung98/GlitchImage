@@ -6,12 +6,16 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -38,6 +42,10 @@ import cn.ezandroid.ezfilter.core.environment.SurfaceFitView;
 
 public class PictureEffectActivity extends BaseActivity implements View.OnTouchListener {
     private static RenderPipeline renderPipeline = new RenderPipeline();
+
+    private LinearLayout lnHand;
+    private Animation animation1;
+    private Animation animation2;
 
     private int screenWidth;
     private int screenHeight;
@@ -117,6 +125,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         effectBmp = myApplication.getImgBMP();
         MyApplication.imgWidth = effectBmp.getWidth();
         MyApplication.imgHeight = effectBmp.getHeight();
+        getImageFromUri();
         initView();
 
         effectName = GalleryEffect.getName();
@@ -164,6 +173,45 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         recyclerView = findViewById(R.id.rcv_filters);
         relativeEffect = findViewById(R.id.relative_effects);
         surfaceFitView = findViewById(R.id.render_view);
+        lnHand = findViewById(R.id.ln_hand);
+        animation1 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_1);
+        animation2 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_2);
+        lnHand.setAnimation(animation1);
+        animation1.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                lnHand.setAnimation(animation2);
+                animation2.start();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation2.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                lnHand.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation1.start();
+
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenHeight = displayMetrics.heightPixels;
         screenWidth = displayMetrics.widthPixels;
@@ -195,6 +243,11 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
 
     @Override
     public void setEffects(int i) {
+        animation1.reset();
+        animation2.reset();
+        lnHand.setVisibility(View.VISIBLE);
+        lnHand.setAnimation(animation1);
+        animation1.start();
         imageChange = true;
         renderPipeline.clearEndPointRenders();
         try {
@@ -307,4 +360,29 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         }
         return true;
     }
+
+    private boolean isEndAnim = false;
+
+//    @Override
+//    public void onAnimationStart(Animation animation) {
+//    }
+//
+//    @Override
+//    public void onAnimationEnd(Animation animation) {
+//        if (isEndAnim) {
+//            lnHand.setVisibility(View.GONE);
+//            animation1.reset();
+//            isEndAnim = false;
+//            return;
+//        }
+//        animation1.reset();
+//        lnHand.setAnimation(animation2);
+//        isEndAnim = true;
+//        animation2.start();
+//    }
+//
+//    @Override
+//    public void onAnimationRepeat(Animation animation) {
+//
+//    }
 }

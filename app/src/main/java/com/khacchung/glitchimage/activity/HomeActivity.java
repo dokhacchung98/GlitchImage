@@ -1,14 +1,17 @@
 package com.khacchung.glitchimage.activity;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.app.Dialog;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-
-import androidx.annotation.Nullable;
+import android.widget.TextView;
 
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.application.MyApplication;
@@ -17,8 +20,6 @@ import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.util.PathManager;
 
 public class HomeActivity extends BaseActivity implements View.OnClickListener {
-
-    private static final int REQUEST_CODE_PICK_IMAGE = 13;
     private RelativeLayout rlCamera;
     private RelativeLayout rlPhoto;
     private RelativeLayout rlList;
@@ -27,9 +28,15 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private ImageButton btnMore;
     private ImageButton btnRate;
 
+    private LinearLayout lnMain;
+    private LinearLayout lnBot;
+    private ImageView imgLogo;
+
     private MyApplication myApplication;
 
     private PathManager pathManager;
+
+    private Animation animation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,6 +58,36 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         btnMore = findViewById(R.id.btn_more);
         btnShare = findViewById(R.id.btn_share);
         btnRate = findViewById(R.id.btn_rate);
+
+        lnMain = findViewById(R.id.ln_main);
+        lnBot = findViewById(R.id.ln_bot);
+        imgLogo = findViewById(R.id.img_logo);
+
+        lnBot.setVisibility(View.GONE);
+        lnMain.setVisibility(View.GONE);
+        btnExit.setVisibility(View.GONE);
+
+        animation = AnimationUtils.loadAnimation(this, R.anim.anim_logo);
+        imgLogo.setAnimation(animation);
+        animation.start();
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                lnBot.setVisibility(View.VISIBLE);
+                lnMain.setVisibility(View.VISIBLE);
+                btnExit.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
 
         rlList.setOnClickListener(this);
         rlPhoto.setOnClickListener(this);
@@ -159,29 +196,8 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         showSnackBar(rlCamera, getString(R.string.error_permission));
     }
 
-    @SuppressLint("IntentReset")
     private void getImageFromGallery() {
-        Intent intent = new Intent(
-                "android.intent.action.PICK",
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        );
-        intent.setType("image/*");
-        startActivityForResult(
-                Intent.createChooser(
-                        intent,
-                        getResources().getString(R.string.via_pick_image)
-                ),
-                REQUEST_CODE_PICK_IMAGE
-        );
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (data != null && requestCode == REQUEST_CODE_PICK_IMAGE) {
-            createFolder();
-            gotoGlitchImage(data.getData().toString());
-        }
+        ChooseImageActivity.startIntent(this);
     }
 
     private void createFolder() {
@@ -198,5 +214,30 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         cancleLoading();
+    }
+
+    @Override
+    public void onBackPressed() {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.dialog_alert_save);
+
+        TextView txtAlert = dialog.findViewById(R.id.txt_alert);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnSave.setText(getResources().getString(R.string.exit));
+        txtAlert.setText(getResources().getString(R.string.ques_exit));
+        btnSave.setOnClickListener(v -> super.onBackPressed());
+        btnCancel.setOnClickListener(v -> {
+            if (dialog.isShowing()) {
+                dialog.cancel();
+                dialog.dismiss();
+            }
+        });
+        Window window = dialog.getWindow();
+        window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 }

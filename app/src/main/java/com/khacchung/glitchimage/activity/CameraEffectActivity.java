@@ -18,7 +18,10 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,6 +64,9 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private static final int MAX_PREVIEW_WIDTH = 1920;
     private static final int MAX_PREVIEW_HEIGHT = 1080;
     private RenderPipeline renderPipeline = new RenderPipeline();
+    private LinearLayout lnHand;
+    private Animation animation1;
+    private Animation animation2;
 
     private PathManager pathManager;
     private int pos = 0;
@@ -177,6 +183,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         surfaceFitView.setRenderMode(1);
         txtTime = findViewById(R.id.txt_time);
         lnHint = findViewById(R.id.rl_function);
+        lnHand = findViewById(R.id.ln_hand);
 
         btnBack = findViewById(R.id.btn_back);
         btnSwitchCam = findViewById(R.id.btn_switch_cam);
@@ -208,6 +215,43 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         params.height = (screenHeight * 229) / 1920;
         params.addRule(13);
         relativeEffect.setLayoutParams(params);
+        animation1 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_1);
+        animation2 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_2);
+        lnHand.setAnimation(animation1);
+        animation1.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                lnHand.setAnimation(animation2);
+                animation2.start();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation2.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                lnHand.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation1.start();
     }
 
     private CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -379,6 +423,11 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
     @Override
     public void setEffects(int i) {
+        animation1.reset();
+        animation2.reset();
+        lnHand.setVisibility(View.VISIBLE);
+        lnHand.setAnimation(animation1);
+        animation1.start();
         releaseCamera();
         openCamera();
         if (iSupportRecord != null) {

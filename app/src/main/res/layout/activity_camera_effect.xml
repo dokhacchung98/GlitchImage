@@ -108,4 +108,37 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/rl_top" />
 
+    <RelativeLayout
+        android:id="@+id/rl_move_hand"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/relative_effects"
+        android:padding="10dp"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/white">
+
+        <LinearLayout
+            android:id="@+id/ln_hand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/txt_move"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="@dimen/_86sdp"
+                android:layout_height="@dimen/_86sdp"
+                android:src="@drawable/ic_hand_move" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txt_move"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            android:text="@string/move_fingure"
+            android:textColor="@color/colorWhite" />
+    </RelativeLayout>
+
 </RelativeLayout>
