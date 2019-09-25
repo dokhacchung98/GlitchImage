@@ -1,5 +1,6 @@
 package com.khacchung.glitchimage.fragment;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,10 +51,27 @@ public class ListFileFragment extends Fragment {
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.colorNoneSeleted), PorterDuff.Mode.SRC_IN);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         if (tabLayout.getTabCount() == 2) {
-            tabLayout.getTabAt(0).setIcon(R.drawable.ic_picture);
-            tabLayout.getTabAt(1).setIcon(R.drawable.ic_film);
+            tabLayout.getTabAt(0).setIcon(R.drawable.ic_photos);
+            tabLayout.getTabAt(1).setIcon(R.drawable.ic_video_lib);
         }
         if (ListFileActivity.isVideo) {
             viewPager.setCurrentItem(1);

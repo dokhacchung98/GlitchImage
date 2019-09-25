@@ -216,6 +216,7 @@ public class GalleryEffect {
     public static void setTouch(int i, int f, int f2) {
         switch (i) {
             case 0:
+            case 44:
                 return;
             case 1:
                 Compression.change(f, f2);
@@ -343,8 +344,6 @@ public class GalleryEffect {
                 return;
             case 43:
                 Waves2.change(f, f2);
-                return;
-            case 44:
                 return;
             case 45:
                 Data.change(f, f2);
