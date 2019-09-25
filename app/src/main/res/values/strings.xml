@@ -17,6 +17,7 @@
     <string name="exit">Exit</string>
     <string name="alert">Warning</string>
     <string name="ques_save">Do you want save image before exiting the screen?</string>
+    <string name="ques_save2">Do you want save video before exiting the screen?</string>
     <string name="ques_remove">Do you want remove file?</string>
     <string name="ques_exit">Do you want exit application?</string>
     <string name="save_success">Save image successful with path: </string>

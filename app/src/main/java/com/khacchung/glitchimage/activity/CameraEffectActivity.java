@@ -1,5 +1,6 @@
 package com.khacchung.glitchimage.activity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,8 +19,10 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -356,7 +359,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             if (!isRecord) {
                 startRecording();
             } else {
-                stopRecording();
+                stopRecordingAndViewer();
             }
         }
     }
@@ -560,7 +563,20 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    public void stopRecording() {
+    public void stopRecordingAndViewer() {
+        stopRecord();
+        gotoViewer();
+
+    }
+
+    private void gotoViewer() {
+        sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+                Uri.fromFile(new File(pathVideo))));
+        ListFileActivity.startIntent(CameraEffectActivity.this, pathVideo, ListFileActivity.TYPE_VIDEO);
+        finish();
+    }
+
+    private void stopRecord() {
         this.isRecord = false;
         this.timeSwapBuff += this.timeInMilliseconds;
         this.customHandler.removeCallbacks(this.updateTimerThread);
@@ -574,10 +590,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             this.btnSwitchMode.setVisibility(View.VISIBLE);
             this.txtTime.setVisibility(View.GONE);
         }
-        sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE",
-                Uri.fromFile(new File(pathVideo))));
-        ListFileActivity.startIntent(CameraEffectActivity.this, pathVideo, ListFileActivity.TYPE_VIDEO);
-        finish();
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -648,5 +660,42 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     protected void onDestroy() {
         releaseCamera();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isRecord) {
+            showDialogAlertSaveVideo();
+        } else
+            super.onBackPressed();
+    }
+
+    private void showDialogAlertSaveVideo() {
+        stopRecord();
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.dialog_alert_save);
+
+        TextView txtAlert = dialog.findViewById(R.id.txt_alert);
+        Button btnSave = dialog.findViewById(R.id.btn_save);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        txtAlert.setText(getResources().getString(R.string.ques_save2));
+        btnSave.setOnClickListener(v -> gotoViewer());
+        btnCancel.setOnClickListener(v -> {
+            if (dialog.isShowing()) {
+                dialog.cancel();
+                dialog.dismiss();
+                super.onBackPressed();
+            }
+            File f = new File(pathVideo);
+            if (f.exists()) {
+                f.delete();
+            }
+        });
+        Window window = dialog.getWindow();
+        window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 }
