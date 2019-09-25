@@ -65,6 +65,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private static final int MAX_PREVIEW_HEIGHT = 1080;
     private RenderPipeline renderPipeline = new RenderPipeline();
     private LinearLayout lnHand;
+    private RelativeLayout rnHand;
     private Animation animation1;
     private Animation animation2;
 
@@ -184,6 +185,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         txtTime = findViewById(R.id.txt_time);
         lnHint = findViewById(R.id.rl_function);
         lnHand = findViewById(R.id.ln_hand);
+        rnHand = findViewById(R.id.rl_move_hand);
 
         btnBack = findViewById(R.id.btn_back);
         btnSwitchCam = findViewById(R.id.btn_switch_cam);
@@ -251,7 +253,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
             }
         });
-        animation1.start();
+        rnHand.setVisibility(View.GONE);
     }
 
     private CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -421,13 +423,28 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         return true;
     }
 
+    private void checkPositionToStartAnimation(int pos) {
+        boolean check = false;
+        for (int item : GalleryEffect.listPositionNone) {
+            if (item == pos) {
+                check = true;
+            }
+        }
+        if (!check) {
+            rnHand.setVisibility(View.VISIBLE);
+            animation1.reset();
+            animation2.reset();
+            lnHand.setVisibility(View.VISIBLE);
+            lnHand.setAnimation(animation1);
+            animation1.start();
+        } else {
+            rnHand.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void setEffects(int i) {
-        animation1.reset();
-        animation2.reset();
-        lnHand.setVisibility(View.VISIBLE);
-        lnHand.setAnimation(animation1);
-        animation1.start();
+        checkPositionToStartAnimation(i);
         releaseCamera();
         openCamera();
         if (iSupportRecord != null) {

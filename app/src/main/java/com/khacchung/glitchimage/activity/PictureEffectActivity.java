@@ -43,6 +43,8 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
     private static RenderPipeline renderPipeline = new RenderPipeline();
 
     private LinearLayout lnHand;
+    private RelativeLayout rnHand;
+
     private Animation animation1;
     private Animation animation2;
 
@@ -173,6 +175,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         relativeEffect = findViewById(R.id.relative_effects);
         surfaceFitView = findViewById(R.id.render_view);
         lnHand = findViewById(R.id.ln_hand);
+        rnHand = findViewById(R.id.rl_move_hand);
         animation1 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_1);
         animation2 = AnimationUtils.loadAnimation(this, R.anim.anim_hand_2);
         lnHand.setAnimation(animation1);
@@ -209,7 +212,7 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
 
             }
         });
-        animation1.start();
+        rnHand.setVisibility(View.GONE);
 
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenHeight = displayMetrics.heightPixels;
@@ -240,13 +243,28 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         }
     }
 
+    private void checkPositionToStartAnimation(int pos) {
+        boolean check = false;
+        for (int item : GalleryEffect.listPositionNone) {
+            if (item == pos) {
+                check = true;
+            }
+        }
+        if (!check) {
+            rnHand.setVisibility(View.VISIBLE);
+            animation1.reset();
+            animation2.reset();
+            lnHand.setVisibility(View.VISIBLE);
+            lnHand.setAnimation(animation1);
+            animation1.start();
+        } else {
+            rnHand.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void setEffects(int i) {
-        animation1.reset();
-        animation2.reset();
-        lnHand.setVisibility(View.VISIBLE);
-        lnHand.setAnimation(animation1);
-        animation1.start();
+        checkPositionToStartAnimation(i);
         imageChange = true;
         renderPipeline.clearEndPointRenders();
         try {

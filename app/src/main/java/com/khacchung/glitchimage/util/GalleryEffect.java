@@ -213,10 +213,14 @@ public class GalleryEffect {
         return null;
     }
 
+    public static int[] listPositionNone = {0, 19, 38, 44};
+
     public static void setTouch(int i, int f, int f2) {
         switch (i) {
             case 0:
             case 44:
+            case 38:
+            case 19:
                 return;
             case 1:
                 Compression.change(f, f2);
@@ -272,8 +276,6 @@ public class GalleryEffect {
             case 18:
                 Spectrum.change(f, f2);
                 return;
-            case 19:
-                return;
             case 20:
                 Ascii.change(f, f2);
                 return;
@@ -327,8 +329,6 @@ public class GalleryEffect {
                 return;
             case 37:
                 Plaza.change(f, f2);
-                return;
-            case 38:
                 return;
             case 39:
                 VaporGlitch.change(f, f2);
