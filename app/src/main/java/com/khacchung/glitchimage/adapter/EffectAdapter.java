@@ -82,22 +82,6 @@ public class EffectAdapter extends RecyclerView.Adapter<EffectAdapter.MyViewHold
             imgMain = itemView.findViewById(R.id.img_main);
             imgMain2 = itemView.findViewById(R.id.img_main1);
             layout = itemView.findViewById(R.id.layout);
-
-            LinearLayout.LayoutParams params1 = (LinearLayout.LayoutParams) layout.getLayoutParams();
-            params1.width = (screenWidth * 171) / 1080;
-            params1.height = (screenHeight * 196) / 1920;
-            layout.setLayoutParams(params1);
-
-            RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) imgMain.getLayoutParams();
-            layoutParams2.width = (screenWidth * 171) / 1080;
-            layoutParams2.height = (screenHeight * 196) / 1920;
-            imgMain.setLayoutParams(layoutParams2);
-            imgMain2.setLayoutParams(layoutParams2);
-
-            RelativeLayout.LayoutParams layoutParams3 = (RelativeLayout.LayoutParams) txtName.getLayoutParams();
-            layoutParams3.width = (screenWidth * 171) / 1080;
-            layoutParams3.height = (screenHeight * 50) / 1920;
-            txtName.setLayoutParams(layoutParams3);
         }
     }
 }
