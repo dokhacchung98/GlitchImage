@@ -26,6 +26,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSettings;
+import com.facebook.ads.InterstitialAd;
+import com.facebook.ads.InterstitialAdListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.khacchung.glitchimage.BuildConfig;
 import com.khacchung.glitchimage.activity.HomeActivity;
@@ -36,12 +41,16 @@ import com.khacchung.glitchimage.customs.CallBackPermission;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.customs.RemoveCallBack;
 import com.khacchung.glitchimage.util.AdjustBitmap;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 
 import java.io.File;
 import java.io.IOException;
 
 @SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements CallBackEffect {
+    private static final String TAG = BaseActivity.class.getSimpleName();
+
     private ProgressDialog dialog;
     public static final String PER_CAMERA = Manifest.permission.CAMERA;
     public static final String PER_READ = Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -52,16 +61,36 @@ public class BaseActivity extends AppCompatActivity implements CallBackEffect {
     private CallBackPermission callBackPermission;
     public int screenHeight;
     public MyApplication myApplication;
+    public InterstitialAd interstitialAd;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AdSettings.addTestDevice(AdsUtil.HASHED_ID);
+
+        interstitialAd = new InterstitialAd(this, AdsUtil.INTERSTITIAL_ID);
+
         dialog = new ProgressDialog(this);
         dialog.setMessage(getString(R.string.please_wait));
         dialog.setCancelable(false);
         myApplication = MyApplication.getInstance();
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         screenHeight = displayMetrics.heightPixels;
+    }
+
+    public boolean isReadyShowInAds() {
+        if (MyApplication.countAction >= 3) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (interstitialAd != null) {
+            interstitialAd.destroy();
+        }
+        super.onDestroy();
     }
 
     protected void setMessageDialog(String text) {

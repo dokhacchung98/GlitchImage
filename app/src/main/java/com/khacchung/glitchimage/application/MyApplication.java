@@ -8,6 +8,15 @@ public class MyApplication extends Application {
     public static int imgWidth = 100;
     public static int imgHeight = 100;
 
+    public static int countAction = 0;
+
+    public static void addCountAction() {
+        countAction++;
+        if (countAction >= 4) {
+            countAction = 0;
+        }
+    }
+
     private String pathImage = "";
     private Bitmap imgBMP;
 

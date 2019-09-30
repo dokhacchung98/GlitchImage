@@ -9,7 +9,7 @@
         android:id="@+id/rl_bot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/banner_container"
         android:background="@color/colorBlack"
         android:elevation="4dp"
         android:paddingTop="@dimen/_8sdp"
@@ -43,6 +43,13 @@
             app:civ_border_color="@color/colorWhite"
             app:civ_border_width="1dp" />
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/banner_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" />
 
     <RelativeLayout
         android:id="@+id/relative_effects"

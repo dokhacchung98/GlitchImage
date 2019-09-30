@@ -22,11 +22,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.ads.AbstractAdListener;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.adapter.EffectAdapter;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 import com.khacchung.glitchimage.util.GalleryEffect;
 import com.khacchung.glitchimage.util.PathManager;
 
@@ -108,11 +115,13 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
     private RelativeLayout relativeEffect;
     private RecyclerView recyclerView;
     private SurfaceFitView surfaceFitView;
+    private AdView adView;
 
     public static void startIntent(BaseActivity activity) {
         activity.startActivity(
                 new Intent(activity, PictureEffectActivity.class)
         );
+        MyApplication.addCountAction();
     }
 
     @Override
@@ -122,6 +131,8 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         setContentView(R.layout.activity_picture_effect);
         enableBackButton();
         setTitleToolbar(getResources().getString(R.string.effect_image));
+        //ads
+        AudienceNetworkInitializeHelper.initialize(this);
 
         effectBmp = myApplication.getImgBMP();
         MyApplication.imgWidth = effectBmp.getWidth();
@@ -224,6 +235,16 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         relativeEffect.setLayoutParams(params);
         surfaceFitView.setRenderMode(1);
         surfaceFitView.setOnTouchListener(this);
+
+        //ads
+        adView = new AdView(this, AdsUtil.BANNER_ID, AdSize.BANNER_HEIGHT_50);
+
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+        // Request an ad
+        adView.loadAd();
     }
 
     private void getImageFromUri() {
@@ -335,8 +356,30 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
         }
         sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE"
                 , Uri.fromFile(new File(str))));
-        ListFileActivity.startIntent(this, str, ListFileActivity.TYPE_IMG);
-        finish();
+
+        interstitialAd.loadAd();
+        interstitialAd.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                ListFileActivity.startIntent(PictureEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                finish();
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                super.onAdLoaded(ad);
+                interstitialAd.show();
+            }
+
+            @Override
+            public void onInterstitialDismissed(Ad ad) {
+                super.onInterstitialDismissed(ad);
+                ListFileActivity.startIntent(PictureEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                finish();
+            }
+        });
+
     }
 
     @Override
@@ -376,5 +419,13 @@ public class PictureEffectActivity extends BaseActivity implements View.OnTouchL
                 GalleryEffect.setTouch(pos, x, y);
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (adView != null) {
+            adView.destroy();
+        }
+        super.onDestroy();
     }
 }
