@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
@@ -30,6 +32,7 @@ import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 public class PreviewActivity extends BaseActivity implements OnPreparedListener, OnSeekCompletionListener {
 
     private static int CURRENT_TYPE = ListFileActivity.TYPE_IMG;
+    private static String TAG = PreviewActivity.class.getSimpleName();
 
     public static void startIntent(BaseActivity baseActivity, String path, int type) {
         Intent intent = new Intent(baseActivity, PreviewActivity.class);
@@ -45,6 +48,8 @@ public class PreviewActivity extends BaseActivity implements OnPreparedListener,
     private PhotoView photoView;
     private VideoView videoView;
     private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,10 +65,22 @@ public class PreviewActivity extends BaseActivity implements OnPreparedListener,
 
         // Find the Ad Container
         LinearLayout adContainer = findViewById(R.id.banner_container);
+        mAdView = findViewById(R.id.adView);
         // Add the ad view to your activity layout
         adContainer.addView(adView);
         // Request an ad
         adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
 
         myPath = intent.getStringExtra(ListFileActivity.PATH);
         myType = intent.getIntExtra(ListFileActivity.TYPE, ListFileActivity.TYPE_IMG);
@@ -163,7 +180,14 @@ public class PreviewActivity extends BaseActivity implements OnPreparedListener,
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        showLoading();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdsUtil.HASHED_ID)
+                .build());
     }
 
     @Override
