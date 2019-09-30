@@ -21,6 +21,8 @@ import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
@@ -44,6 +46,8 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private LinearLayout lnBot;
     private ImageView imgLogo;
     private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
 
     private PathManager pathManager;
 
@@ -76,8 +80,26 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 @Override
                 public void onError(Ad ad, AdError error) {
                     super.onError(ad, error);
-                    Log.e(TAG, "onInterstitialDismissed()");
-                    startAnim();
+                    Log.e(TAG, "load Ads Facebook onError()");
+                    mInterstitialAd.setAdListener(new AdListener(){
+                        @Override
+                        public void onAdClosed() {
+                            super.onAdClosed();
+                            startAnim();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(int i) {
+                            super.onAdFailedToLoad(i);
+                            Log.e(TAG, "load Admob onError()");
+                            startAnim();
+                        }
+                    });
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                    } else {
+                       startAnim();
+                    }
                 }
 
                 @Override
@@ -105,7 +127,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         lnBot = findViewById(R.id.ln_bot);
         imgLogo = findViewById(R.id.img_logo);
         progressBar = findViewById(R.id.process_loading);
-
+        mAdView = findViewById(R.id.adView);
 
         lnBot.setVisibility(View.GONE);
         lnMain.setVisibility(View.GONE);
@@ -156,6 +178,17 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         adContainer.addView(adView);
         // Request an ad
         adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
     }
 
     @Override
@@ -168,7 +201,26 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                         @Override
                         public void onError(Ad ad, AdError error) {
                             super.onError(ad, error);
-                            gotoCameraActivity();
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener(){
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoCameraActivity();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoCameraActivity();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                gotoCameraActivity();
+                            }
                         }
 
                         @Override
@@ -194,7 +246,27 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                         @Override
                         public void onError(Ad ad, AdError error) {
                             super.onError(ad, error);
-                            gotoChosePhoto();
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener(){
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoChosePhoto();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoChosePhoto();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                Log.e(TAG,"The interstitial wasn't loaded yet.");
+                                gotoChosePhoto();
+                            }
                         }
 
                         @Override
@@ -223,7 +295,26 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                         @Override
                         public void onError(Ad ad, AdError error) {
                             super.onError(ad, error);
-                            gotoListFileCreated();
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener() {
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoListFileCreated();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoListFileCreated();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                gotoListFileCreated();
+                            }
                         }
 
                         @Override
@@ -343,6 +434,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         cancleLoading();
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdsUtil.HASHED_ID)
+                .build());
     }
 
     @Override
