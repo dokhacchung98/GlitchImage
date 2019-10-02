@@ -23,7 +23,10 @@
     <string name="save_success">Save image successful with path: </string>
     <string name="have_error">There was an error, please try again..</string>
     <string name="empty_file_list">Empty file list</string>
-    <string name="preview">Photo View</string>
+    <string name="preview">Photo View</string>n
     <string name="start_time">00:00</string>
     <string name="choose_image">Choose Image</string>
+    
+    <string name="id_banner">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="id_iterstitial">ca-app-pub-3940256099942544/1033173712</string>
 </resources>

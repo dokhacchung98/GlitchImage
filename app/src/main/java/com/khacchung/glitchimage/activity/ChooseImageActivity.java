@@ -6,22 +6,33 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.ads.AbstractAdListener;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.adapter.FolderAdapter;
 import com.khacchung.glitchimage.adapter.ImageChooseAdapter;
+import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.models.MyFolder;
 import com.khacchung.glitchimage.models.MyImage;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 
 import java.io.File;
 import java.util.ArrayList;
 
 public class ChooseImageActivity extends BaseActivity {
+    private static final String TAG = ChooseImageActivity.class.getSimpleName();
     private ArrayList<MyFolder> listFolder = new ArrayList<>();
     private ArrayList<MyImage> listImage = new ArrayList<>();
     private ArrayList<MyImage> listFullImage = new ArrayList<>();
@@ -30,10 +41,14 @@ public class ChooseImageActivity extends BaseActivity {
 
     private RecyclerView rvFolder;
     private RecyclerView rvImage;
+    private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
 
     public static void startIntent(BaseActivity activity) {
         Intent intent = new Intent(activity, ChooseImageActivity.class);
         activity.startActivity(intent);
+        MyApplication.addCountAction();
     }
 
     @Override
@@ -42,9 +57,33 @@ public class ChooseImageActivity extends BaseActivity {
         enableBackButton();
         setTitleToolbar(getResources().getString(R.string.choose_image));
         setContentView(R.layout.activity_choose_image);
+        //ads
+        AudienceNetworkInitializeHelper.initialize(this);
 
         rvFolder = findViewById(R.id.rvFolder);
         rvImage = findViewById(R.id.rvImage);
+
+        //ads
+        adView = new AdView(this, AdsUtil.BANNER_ID, AdSize.BANNER_HEIGHT_50);
+        mAdView = findViewById(R.id.adView);
+
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+        // Request an ad
+        adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
 
         folderAdapter = new FolderAdapter(this, listFolder);
         imageChooseAdapter = new ImageChooseAdapter(this, listImage);
@@ -124,5 +163,13 @@ public class ChooseImageActivity extends BaseActivity {
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (adView != null) {
+            adView.destroy();
+        }
+        super.onDestroy();
     }
 }

@@ -2,15 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/background">
 
     <ImageButton
         android:id="@+id/btn_exit"
         android:layout_width="38dp"
         android:layout_height="37dp"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/banner_container"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/_32sdp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/ic_exit"
         android:padding="@dimen/_8sdp" />
 
@@ -55,9 +56,9 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ln_more"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/ln_more"
             android:layout_marginHorizontal="@dimen/_8sdp"
             android:layout_weight="1"
             android:gravity="center"
@@ -79,12 +80,12 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ln_rate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_8sdp"
             android:layout_weight="1"
             android:gravity="center"
-            android:id="@+id/ln_rate"
             android:orientation="vertical">
 
             <ImageButton
@@ -187,5 +188,30 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/banner_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/adView"
+        android:orientation="vertical" />
+
+    <ProgressBar
+        android:id="@+id/process_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_32sdp"
+        android:indeterminateTint="@color/colorWhite" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/id_banner"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

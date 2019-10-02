@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -33,11 +34,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.ads.AbstractAdListener;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.adapter.EffectAdapter;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 import com.khacchung.glitchimage.util.GalleryEffect;
 import com.khacchung.glitchimage.util.PathManager;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -158,13 +168,17 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     private long timeSwapBuff = 0;
     private long updatedTime = 0;
     private String mCameraId;
-
+    private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
     private Handler customHandler = new Handler();
+    private static String TAG = CameraEffectActivity.class.getSimpleName();
 
     public static void startIntent(BaseActivity activity) {
         activity.startActivity(
                 new Intent(activity, CameraEffectActivity.class)
         );
+        MyApplication.addCountAction();
     }
 
     @Override
@@ -175,6 +189,10 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         setContentView(R.layout.activity_camera_effect);
         currentFilter = new FilterRender();
         nameFile = "video" + System.currentTimeMillis() + ".mp4";
+
+        //ads
+        AudienceNetworkInitializeHelper.initialize(this);
+
         initView();
         openCamera();
     }
@@ -257,6 +275,28 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
             }
         });
         rnHand.setVisibility(View.GONE);
+
+        //ads
+        adView = new AdView(this, AdsUtil.BANNER_ID, AdSize.BANNER_HEIGHT_50);
+
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        mAdView = findViewById(R.id.adView);
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+        // Request an ad
+        adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
     }
 
     private CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -316,6 +356,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     @Override
     protected void onResume() {
         super.onResume();
+        cancleLoading();
         checkPermission(new String[]{
                         BaseActivity.PER_CAMERA,
                         BaseActivity.PER_READ,
@@ -365,6 +406,7 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void gotoListFileCreatedActivity() {
+        showLoading();
         ListFileActivity.startIntent(this, null, 0);
     }
 
@@ -410,8 +452,53 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ListFileActivity.startIntent(this, str, ListFileActivity.TYPE_IMG);
-        finish();
+
+        showLoading();
+        interstitialAd.loadAd();
+        interstitialAd.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "load Ads Facebook onError()");
+                mInterstitialAd.setAdListener(new AdListener(){
+                    @Override
+                    public void onAdClosed() {
+                        super.onAdClosed();
+                        showLoading();
+                        ListFileActivity.startIntent(CameraEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                        finish();
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(int i) {
+                        super.onAdFailedToLoad(i);
+                        Log.e(TAG, "load Admob onError()");
+                        ListFileActivity.startIntent(CameraEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                        finish();
+                    }
+                });
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    ListFileActivity.startIntent(CameraEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                super.onAdLoaded(ad);
+                interstitialAd.show();
+            }
+
+            @Override
+            public void onInterstitialDismissed(Ad ad) {
+                super.onInterstitialDismissed(ad);
+                showLoading();
+                ListFileActivity.startIntent(CameraEffectActivity.this, str, ListFileActivity.TYPE_IMG);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -476,7 +563,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void openCamera() {
-
         manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             CameraCharacteristics cameraCharacteristics =
@@ -565,13 +651,52 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
 
     public void stopRecordingAndViewer() {
         stopRecord();
-        gotoViewer();
 
+        interstitialAd.loadAd();
+        interstitialAd.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "load Ads Facebook onError()");
+                mInterstitialAd.setAdListener(new AdListener(){
+                    @Override
+                    public void onAdClosed() {
+                        super.onAdClosed();
+                        gotoViewer();
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(int i) {
+                        super.onAdFailedToLoad(i);
+                        Log.e(TAG, "load Admob onError()");
+                        gotoViewer();
+                    }
+                });
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    gotoViewer();
+                }
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                super.onAdLoaded(ad);
+                interstitialAd.show();
+            }
+
+            @Override
+            public void onInterstitialDismissed(Ad ad) {
+                super.onInterstitialDismissed(ad);
+                gotoViewer();
+            }
+        });
     }
 
     private void gotoViewer() {
         sendBroadcast(new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE",
                 Uri.fromFile(new File(pathVideo))));
+        showLoading();
         ListFileActivity.startIntent(CameraEffectActivity.this, pathVideo, ListFileActivity.TYPE_VIDEO);
         finish();
     }
@@ -657,12 +782,6 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
     }
 
     @Override
-    protected void onDestroy() {
-        releaseCamera();
-        super.onDestroy();
-    }
-
-    @Override
     public void onBackPressed() {
         if (isRecord) {
             showDialogAlertSaveVideo();
@@ -697,5 +816,14 @@ public class CameraEffectActivity extends BaseActivity implements View.OnClickLi
         window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        releaseCamera();
+        if (adView != null) {
+            adView.destroy();
+        }
+        super.onDestroy();
     }
 }

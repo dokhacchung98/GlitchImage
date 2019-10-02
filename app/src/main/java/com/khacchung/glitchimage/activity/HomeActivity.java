@@ -2,6 +2,8 @@ package com.khacchung.glitchimage.activity;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
@@ -10,16 +12,27 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.ads.AbstractAdListener;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
 import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackPermission;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 import com.khacchung.glitchimage.util.PathManager;
 
 public class HomeActivity extends BaseActivity implements View.OnClickListener {
+    private static final String TAG = HomeActivity.class.getSimpleName();
     private RelativeLayout rlCamera;
     private RelativeLayout rlPhoto;
     private RelativeLayout rlList;
@@ -27,16 +40,19 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private LinearLayout btnShare;
     private LinearLayout btnMore;
     private LinearLayout btnRate;
+    private ProgressBar progressBar;
 
     private LinearLayout lnMain;
     private LinearLayout lnBot;
     private ImageView imgLogo;
-
-    private MyApplication myApplication;
+    private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
 
     private PathManager pathManager;
 
     private Animation animation;
+    private Handler handler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +61,55 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_home);
         myApplication = MyApplication.getInstance();
 
+        //ads
+        AudienceNetworkInitializeHelper.initialize(this);
+
         initView();
+
+        handler = new Handler();
+        handler.postDelayed(() -> {
+            interstitialAd.loadAd();
+            interstitialAd.setAdListener(new AbstractAdListener() {
+                @Override
+                public void onInterstitialDismissed(Ad ad) {
+                    super.onInterstitialDismissed(ad);
+                    Log.e(TAG, "onInterstitialDismissed()");
+                    startAnim();
+                }
+
+                @Override
+                public void onError(Ad ad, AdError error) {
+                    super.onError(ad, error);
+                    Log.e(TAG, "load Ads Facebook onError()");
+                    mInterstitialAd.setAdListener(new AdListener(){
+                        @Override
+                        public void onAdClosed() {
+                            super.onAdClosed();
+                            startAnim();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(int i) {
+                            super.onAdFailedToLoad(i);
+                            Log.e(TAG, "load Admob onError()");
+                            startAnim();
+                        }
+                    });
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                    } else {
+                       startAnim();
+                    }
+                }
+
+                @Override
+                public void onAdLoaded(Ad ad) {
+                    super.onAdLoaded(ad);
+                    Log.e(TAG, "onAdLoaded()");
+                    interstitialAd.show();
+                }
+            });
+        }, 2000);
 
         pathManager = new PathManager(this);
     }
@@ -62,11 +126,20 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         lnMain = findViewById(R.id.ln_main);
         lnBot = findViewById(R.id.ln_bot);
         imgLogo = findViewById(R.id.img_logo);
+        progressBar = findViewById(R.id.process_loading);
+        mAdView = findViewById(R.id.adView);
 
         lnBot.setVisibility(View.GONE);
         lnMain.setVisibility(View.GONE);
         btnExit.setVisibility(View.GONE);
 
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.anim_logo_start);
+        imgLogo.setAnimation(animation);
+        animation.start();
+    }
+
+    private void startAnim() {
+        progressBar.setVisibility(View.GONE);
         animation = AnimationUtils.loadAnimation(this, R.anim.anim_logo);
         imgLogo.setAnimation(animation);
         animation.start();
@@ -96,22 +169,169 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         btnShare.setOnClickListener(this);
         btnExit.setOnClickListener(this);
         btnMore.setOnClickListener(this);
+
+        //ads
+        adView = new AdView(this, AdsUtil.BANNER_ID, AdSize.BANNER_HEIGHT_50);
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+        // Request an ad
+        adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.rl_camera:
-                gotoCameraActivity();
+                if (isReadyShowInAds()) {
+                    interstitialAd.loadAd();
+                    interstitialAd.setAdListener(new AbstractAdListener() {
+                        @Override
+                        public void onError(Ad ad, AdError error) {
+                            super.onError(ad, error);
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener(){
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoCameraActivity();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoCameraActivity();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                gotoCameraActivity();
+                            }
+                        }
+
+                        @Override
+                        public void onAdLoaded(Ad ad) {
+                            super.onAdLoaded(ad);
+                            interstitialAd.show();
+                        }
+
+                        @Override
+                        public void onInterstitialDismissed(Ad ad) {
+                            super.onInterstitialDismissed(ad);
+                            gotoCameraActivity();
+                        }
+                    });
+                } else {
+                    gotoCameraActivity();
+                }
                 break;
             case R.id.rl_photo:
-                gotoChosePhoto();
+                if (isReadyShowInAds()) {
+                    interstitialAd.loadAd();
+                    interstitialAd.setAdListener(new AbstractAdListener() {
+                        @Override
+                        public void onError(Ad ad, AdError error) {
+                            super.onError(ad, error);
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener(){
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoChosePhoto();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoChosePhoto();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                Log.e(TAG,"The interstitial wasn't loaded yet.");
+                                gotoChosePhoto();
+                            }
+                        }
+
+                        @Override
+                        public void onAdLoaded(Ad ad) {
+                            super.onAdLoaded(ad);
+                            interstitialAd.show();
+                        }
+
+                        @Override
+                        public void onInterstitialDismissed(Ad ad) {
+                            super.onInterstitialDismissed(ad);
+                            gotoChosePhoto();
+                        }
+                    });
+                } else {
+                    gotoChosePhoto();
+                }
                 break;
             case R.id.btn_exit:
                 onBackPressed();
                 break;
             case R.id.rl_list:
-                gotoListFileCreated();
+                if (isReadyShowInAds()) {
+                    interstitialAd.loadAd();
+                    interstitialAd.setAdListener(new AbstractAdListener() {
+                        @Override
+                        public void onError(Ad ad, AdError error) {
+                            super.onError(ad, error);
+                            Log.e(TAG, "load Ads Facebook onError()");
+                            mInterstitialAd.setAdListener(new AdListener() {
+                                @Override
+                                public void onAdClosed() {
+                                    super.onAdClosed();
+                                    gotoListFileCreated();
+                                }
+
+                                @Override
+                                public void onAdFailedToLoad(int i) {
+                                    super.onAdFailedToLoad(i);
+                                    Log.e(TAG, "load Admob onError()");
+                                    gotoListFileCreated();
+                                }
+                            });
+                            if (mInterstitialAd.isLoaded()) {
+                                mInterstitialAd.show();
+                            } else {
+                                gotoListFileCreated();
+                            }
+                        }
+
+                        @Override
+                        public void onAdLoaded(Ad ad) {
+                            super.onAdLoaded(ad);
+                            interstitialAd.show();
+                        }
+
+                        @Override
+                        public void onInterstitialDismissed(Ad ad) {
+                            super.onInterstitialDismissed(ad);
+                            gotoListFileCreated();
+                        }
+                    });
+                } else {
+                    gotoListFileCreated();
+                }
                 break;
             case R.id.ln_share:
                 intentShareApp();
@@ -214,6 +434,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         cancleLoading();
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdsUtil.HASHED_ID)
+                .build());
     }
 
     @Override
@@ -239,5 +462,13 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (adView != null) {
+            adView.destroy();
+        }
+        super.onDestroy();
     }
 }

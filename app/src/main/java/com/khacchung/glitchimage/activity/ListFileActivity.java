@@ -4,13 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.facebook.ads.AbstractAdListener;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
 import com.khacchung.glitchimage.R;
+import com.khacchung.glitchimage.application.MyApplication;
 import com.khacchung.glitchimage.base.BaseActivity;
 import com.khacchung.glitchimage.customs.CallBackClick;
 import com.khacchung.glitchimage.customs.CallBackPermission;
@@ -19,6 +28,8 @@ import com.khacchung.glitchimage.customs.UpdateList;
 import com.khacchung.glitchimage.fragment.ImageCreatedFragment;
 import com.khacchung.glitchimage.fragment.ListFileFragment;
 import com.khacchung.glitchimage.fragment.VideoCreatedFragment;
+import com.khacchung.glitchimage.util.AdsUtil;
+import com.khacchung.glitchimage.util.AudienceNetworkInitializeHelper;
 import com.khacchung.glitchimage.util.PathManager;
 
 import java.io.File;
@@ -39,12 +50,16 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
     private ArrayList<String> listImages = new ArrayList<>();
     private ArrayList<String> listVideos = new ArrayList<>();
     public static boolean isVideo = false;
+    private AdView adView;
+    private com.google.android.gms.ads.AdView mAdView;
+    private AdRequest adRequest;
 
     public static void startIntent(BaseActivity activity, String path, int type) {
         Intent intent = new Intent(activity, ListFileActivity.class);
         intent.putExtra(PATH, path);
         intent.putExtra(TYPE, type);
         activity.startActivity(intent);
+        MyApplication.addCountAction();
     }
 
     @Override
@@ -65,6 +80,8 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         } else if (path != null && type == TYPE_IMG) {
             isVideo = false;
         }
+        //ads
+        AudienceNetworkInitializeHelper.initialize(this);
 
         checkPermission(new String[]{
                 BaseActivity.PER_READ,
@@ -88,9 +105,33 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
     @Override
     protected void onResume() {
         super.onResume();
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdsUtil.HASHED_ID)
+                .build());
     }
 
     private void initView() {
+        //ads
+        adView = new AdView(this, AdsUtil.BANNER_ID, AdSize.BANNER_HEIGHT_50);
+        mAdView = findViewById(R.id.adView);
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+        // Request an ad
+        adView.loadAd();
+        adView.setAdListener(new AbstractAdListener() {
+            @Override
+            public void onError(Ad ad, AdError error) {
+                super.onError(ad, error);
+                Log.e(TAG, "loadAdsFacebook onError()");
+                adRequest = new AdRequest.Builder()
+                        .addTestDevice(AdsUtil.HASHED_ID)
+                        .build();
+                mAdView.loadAd(adRequest);
+            }
+        });
+
         listImages = new ArrayList<>();
         listVideos = new ArrayList<>();
 
@@ -107,13 +148,6 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
         cancleLoading();
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        getAllVideosIsCreated();
-        getAllImagesIsCreated();
-    }
-
     private void addFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_render, listFileFragment);
@@ -123,14 +157,105 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
     @Override
     public void ClickImage(int pos) {
         if (pos >= 0 && pos < listImages.size()) {
-            PreviewActivity.startIntent(this, listImages.get(pos), ListFileActivity.TYPE_IMG);
+            if (isReadyShowInAds()) {
+                interstitialAd.loadAd();
+                interstitialAd.setAdListener(new AbstractAdListener() {
+                    @Override
+                    public void onError(Ad ad, AdError error) {
+                        super.onError(ad, error);
+                        Log.e(TAG, "load Ads Facebook onError()");
+                        mInterstitialAd.setAdListener(new AdListener() {
+                            @Override
+                            public void onAdClosed() {
+                                super.onAdClosed();
+                                PreviewActivity.startIntent(ListFileActivity.this,
+                                        listImages.get(pos), ListFileActivity.TYPE_IMG);
+                            }
+
+                            @Override
+                            public void onAdFailedToLoad(int i) {
+                                super.onAdFailedToLoad(i);
+                                Log.e(TAG, "load Admob onError()");
+                                PreviewActivity.startIntent(ListFileActivity.this,
+                                        listImages.get(pos), ListFileActivity.TYPE_IMG);
+                            }
+                        });
+                        if (mInterstitialAd.isLoaded()) {
+                            mInterstitialAd.show();
+                        } else {
+                            PreviewActivity.startIntent(ListFileActivity.this,
+                                    listImages.get(pos), ListFileActivity.TYPE_IMG);
+                        }
+                    }
+
+                    @Override
+                    public void onAdLoaded(Ad ad) {
+                        super.onAdLoaded(ad);
+                        interstitialAd.show();
+                    }
+
+                    @Override
+                    public void onInterstitialDismissed(Ad ad) {
+                        super.onInterstitialDismissed(ad);
+                        PreviewActivity.startIntent(ListFileActivity.this,
+                                listImages.get(pos), ListFileActivity.TYPE_IMG);
+                    }
+                });
+            } else {
+                PreviewActivity.startIntent(this, listImages.get(pos), ListFileActivity.TYPE_IMG);
+            }
         }
     }
 
     @Override
     public void ClickVideo(int pos) {
         if (pos >= 0 && pos < listVideos.size()) {
-            PreviewActivity.startIntent(this, listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+            if (isReadyShowInAds()) {
+                interstitialAd.loadAd();
+                interstitialAd.setAdListener(new AbstractAdListener() {
+                    @Override
+                    public void onError(Ad ad, AdError error) {
+                        super.onError(ad, error);
+                        Log.e(TAG, "load Ads Facebook onError()");
+                        mInterstitialAd.setAdListener(new AdListener() {
+                            @Override
+                            public void onAdClosed() {
+                                super.onAdClosed();
+                                PreviewActivity.startIntent(ListFileActivity.this,
+                                        listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+                            }
+
+                            @Override
+                            public void onAdFailedToLoad(int i) {
+                                super.onAdFailedToLoad(i);
+                                Log.e(TAG, "load Admob onError()");
+                                PreviewActivity.startIntent(ListFileActivity.this,
+                                        listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+                            }
+                        });
+                        if (mInterstitialAd.isLoaded()) {
+                            mInterstitialAd.show();
+                        } else {
+                            PreviewActivity.startIntent(ListFileActivity.this,
+                                    listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+                        }
+                    }
+
+                    @Override
+                    public void onAdLoaded(Ad ad) {
+                        super.onAdLoaded(ad);
+                        interstitialAd.show();
+                    }
+
+                    @Override
+                    public void onInterstitialDismissed(Ad ad) {
+                        super.onInterstitialDismissed(ad);
+                        PreviewActivity.startIntent(ListFileActivity.this,
+                                listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
+                    }
+                });
+            } else
+                PreviewActivity.startIntent(this, listVideos.get(pos), ListFileActivity.TYPE_VIDEO);
         }
     }
 
@@ -202,11 +327,61 @@ public class ListFileActivity extends BaseActivity implements CallBackClick, Upd
 
     @Override
     public void editImageAtPos(int pos) {
-        runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+        if (isReadyShowInAds()) {
+            interstitialAd.loadAd();
+            interstitialAd.setAdListener(new AbstractAdListener() {
+                @Override
+                public void onError(Ad ad, AdError error) {
+                    super.onError(ad, error);
+                    Log.e(TAG, "load Ads Facebook onError()");
+                    mInterstitialAd.setAdListener(new AdListener() {
+                        @Override
+                        public void onAdClosed() {
+                            super.onAdClosed();
+                            runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(int i) {
+                            super.onAdFailedToLoad(i);
+                            Log.e(TAG, "load Admob onError()");
+                            runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+                        }
+                    });
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                    } else {
+                        runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+                    }
+                }
+
+                @Override
+                public void onAdLoaded(Ad ad) {
+                    super.onAdLoaded(ad);
+                    interstitialAd.show();
+                }
+
+                @Override
+                public void onInterstitialDismissed(Ad ad) {
+                    super.onInterstitialDismissed(ad);
+                    runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+                }
+            });
+        } else {
+            runOnUiThread(() -> gotoGlitchImage(listImages.get(pos)));
+        }
     }
 
     @Override
     public void editVideoAtPos(int pos) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (adView != null) {
+            adView.destroy();
+        }
+        super.onDestroy();
     }
 }
